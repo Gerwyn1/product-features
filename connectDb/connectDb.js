@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import chalk from "chalk";
 
-export async function connectDB(url) {
+async function connectDB(url) {
   try {
     await mongoose.connect(url, {
       useNewUrlParser: true,
@@ -10,7 +10,7 @@ export async function connectDB(url) {
 
     console.log(chalk.cyan('Connected to database'));
 
-    // Close the Mongoose connection when the Node.js process is terminated
+    // Close Mongoose connection when process is terminated
     process.on('SIGINT', async () => {
       await mongoose.connection.close();
       console.log(chalk.red('Database connection closed due to app termination'));
@@ -22,3 +22,5 @@ export async function connectDB(url) {
     throw error;
   }
 }
+
+export default connectDB;
