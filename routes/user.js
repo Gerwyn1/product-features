@@ -1,25 +1,20 @@
 import express from "express";
+
 import * as UserController from "../controllers/user.js";
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// User Registration
-router.post("/register", UserController.register)
+router.post('/', UserController.registerUser);
+router.post('/auth', UserController.authUser);
+router.post('/logout', UserController.logoutUser);
+router
+  .route('/profile')
+  .get(protect, UserController.getUserProfile)
+  .put(protect, UserController.updateUserProfile);
 
 // User Login
-router.post('/login', (req, res) => {
-  // Handle user login logic
-});
-
-// User Logout
-router.post('/logout', (req, res) => {
-  // Handle user logout logic
-});
-
-// User Profile
-router.get('/profile', (req, res) => {
-  // Handle user profile retrieval logic
-});
+// router.post('/login', UserController.login);
 
 // Change Password
 router.put('/profile/password', (req, res) => {
