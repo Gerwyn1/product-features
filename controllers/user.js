@@ -40,7 +40,7 @@ const logoutUser = (req, res) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, roles } = req.body;
 
   const userExists = await UserModel.findOne({ email });
 
@@ -53,6 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password,
+    roles
   });
 
   if (user) {
@@ -113,8 +114,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 });
-
-
 
  export  {
   registerUser,

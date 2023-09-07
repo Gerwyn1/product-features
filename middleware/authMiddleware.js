@@ -25,5 +25,32 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-// can add in more or other types of authentication middleware if needed...
-export {protect}
+const checkUserRole = (...allowedRoles) => {
+  return asyncHandler(async (req, res, next) => {
+    try {
+      const user = await UserModel.findById(req.user.id);
+      
+       if (!user?.roles) {
+          throw new Error('Not authorized, no roles found');
+        }
+
+      // Check if the user has one of the allowed roles
+      const rolesArray = [...allowedRoles];
+      const result = user.roles.map(role => rolesArray.includes(role)).find(val => val === true);
+      if (!result) {
+        throw new Error('Not authorized, user does not have required role');
+      }
+
+      // If user has allowed role, continue to next middleware
+      next();
+    } catch (error) {
+        res.status(401);
+        next(error);
+    }
+  });
+};
+
+export {
+  protect,
+  checkUserRole
+}

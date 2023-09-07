@@ -2,6 +2,8 @@ import express from "express";
 
 import * as UserController from "../controllers/user.js";
 import { protect } from '../middleware/authMiddleware.js';
+import {ROLES_LIST} from "../config/roles_list.js";
+import {checkUserRole} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -10,15 +12,7 @@ router.post('/auth', UserController.authUser);
 router.post('/logout', UserController.logoutUser);
 router
   .route('/profile')
-  .get(protect, UserController.getUserProfile)
-  .put(protect, UserController.updateUserProfile);
-
-// User Login
-// router.post('/login', UserController.login);
-
-// Change Password
-router.put('/profile/password', (req, res) => {
-  // Handle change password logic
-});
+  .get(protect, checkUserRole(ROLES_LIST.user), UserController.getUserProfile)
+  .put(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin), UserController.updateUserProfile);
 
 export default router;
