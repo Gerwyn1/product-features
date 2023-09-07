@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 
 import connectDB from './connectDb/connectDb.js';
 import UserRoutes from './routes/user.js';
+import RoomRoutes from './routes/room.js';
+
 import {notFound, errorHandler} from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -21,6 +23,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', UserRoutes);
+app.use('/api/rooms', RoomRoutes);
 
 // connect db
 (async () => {
