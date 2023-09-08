@@ -7,12 +7,26 @@ import {checkUserRole} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// get all users
+router.get('/', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin), UserController.getAllUsers);
+
+// register user
 router.post('/', UserController.registerUser);
+
+// login user
 router.post('/auth', UserController.authUser);
-router.post('/logout', UserController.logoutUser);
+
+// logout user
+router.post('/logout', protect, UserController.logoutUser);
+
+// delete user
+router.delete('/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.deleteUser);
+
+// get user profile & update user profile
 router
-  .route('/profile')
-  .get(protect, checkUserRole(ROLES_LIST.user), UserController.getUserProfile)
-  .put(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin), UserController.updateUserProfile);
+.route('/profile')
+.get(protect, checkUserRole(ROLES_LIST.user), UserController.getUserProfile)
+.put(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin), UserController.updateUserProfile);
+
 
 export default router;

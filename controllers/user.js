@@ -3,6 +3,11 @@ import asyncHandler from 'express-async-handler';
 import UserModel from '../models/user.js';
 import generateToken from '../utils/generateToken.js';
 
+const getAllUsers = asyncHandler(async (_,res) => {
+  const users = await UserModel.find({});
+  res.status(200).json(users);
+});
+
 // @desc    Auth user & get token (login)
 // @route   POST /api/users/auth
 // @access  Public
@@ -28,19 +33,23 @@ const authUser = asyncHandler(async (req, res) => {
 // @desc    Logout user / clear cookie
 // @route   POST /api/users/logout
 // @access  Public
-const logoutUser = (req, res) => {
+const logoutUser = (_, res) => {
   res.cookie('jwt', '', {
     httpOnly: true,
     expires: new Date(0),
   });
-  res.status(200).json({ message: 'Logged out successfully' });
-};
+  res.status(200).json({message : 'User successfully logged out'})};
 
 // @desc    Register a new user
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, roles } = req.body;
+
+  if (!name || !email || !password) {
+    res.status(400)
+    throw new Error('Please add all fields')
+  }
 
   const userExists = await UserModel.findOne({ email });
 
@@ -63,6 +72,7 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      roles,
     });
   } else {
     res.status(400);
@@ -74,7 +84,7 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   GET /api/users/profile
 // @access  Private
 const getUserProfile = asyncHandler(async (req, res) => {
-  const user = await UserModel.findById(req.user._id);
+  const user = await UserModel.findById(req.user?._id);
 
   if (user) {
     res.json({
@@ -92,7 +102,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/profile
 // @access  Private
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const user = await UserModel.findById(req.user._id);
+  const user = await UserModel.findById(req.user?._id);
 
   if (user) {
     user.name = req.body.name || user.name;
@@ -115,10 +125,23 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteUser = asyncHandler(async (req, res) => {
+  const result = await UserModel.deleteOne({_id: req.params.id});
+
+  if (result.deletedCount === 0) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  res.status(200).json({message: 'User successfully deleted'});
+});
+
  export  {
+  getAllUsers,
   registerUser,
   authUser,
   logoutUser,
+  deleteUser,
   getUserProfile,
   updateUserProfile,
  }

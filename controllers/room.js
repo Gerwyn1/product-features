@@ -2,19 +2,41 @@ import asyncHandler from 'express-async-handler';
 
 import RoomModel from '../models/room.js';
 
-const getAllRooms = asyncHandler(async (req, res) => {
-  const rooms = await RoomModel.find({});
-  res.json(rooms);
-})
+const getRoom = asyncHandler(async (req, res) => {
+  const room = await RoomModel.findOne({_id : req.params?.id});
+  if (!room) {
+    res.status(404);
+    throw new Error('Room not found');
+  }
+  
+  const roomSize = room.customSize ? room.customSize : room.size;
 
-const getSpecifiedRooms = asyncHandler(async (req, res) => {
+  res.status(200).json({
+    _id: room._id,
+    size: roomSize
+  });
+});
+
+const getAllRooms = asyncHandler(async (_,res) => {
+  const rooms = await RoomModel.find({});
+  res.status(200).json(rooms);
+});
+
+const getSpecificRooms = asyncHandler(async (req, res) => {
   const roomSize = req.params?.roomSize;
+
   const prop = (isNaN(parseInt(roomSize)) ? 'size' : 'customSize');
   const rooms = await RoomModel.find({
     [prop]: roomSize
   }).exec();
-  res.json(rooms);
-})
+
+  if (rooms.length === 0) {
+    res.status(404);
+    throw new Error('No matching rooms found')
+  }
+
+  res.status(200).json(rooms);
+});
 
 const createRoom = asyncHandler(async (req, res) => {
   const {
@@ -35,8 +57,21 @@ const createRoom = asyncHandler(async (req, res) => {
   res.status(201).json(room);
 });
 
+const deleteRoom = asyncHandler(async (req, res) => {
+  const result = await RoomModel.deleteOne({_id: req.params.id});
+
+  if (result.deletedCount === 0) {
+    res.status(404);
+    throw new Error('Room not found');
+  }
+
+  res.status(200).json({message: 'Room successfully deleted'});
+});
+
 export {
-  createRoom,
+  getRoom,
   getAllRooms,
-  getSpecifiedRooms
+  getSpecificRooms,
+  createRoom,
+  deleteRoom
 }

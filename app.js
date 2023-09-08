@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import connectDB from './connectDb/connectDb.js';
 import UserRoutes from './routes/user.js';
 import RoomRoutes from './routes/room.js';
-
 import {notFound, errorHandler} from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -33,6 +32,7 @@ app.use('/api/rooms', RoomRoutes);
     console.error('An error occurred during database connection:', error);
   }
 })();
+
 
 app.use(notFound);
 app.use(errorHandler);
