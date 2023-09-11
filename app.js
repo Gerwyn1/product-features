@@ -2,10 +2,13 @@ import express from 'express';
 import cors from "cors";
 import 'dotenv/config'
 import cookieParser from 'cookie-parser';
+import multer from 'multer';
+import morgan from 'morgan';
 
 import connectDB from './connectDb/connectDb.js';
 import UserRoutes from './routes/user.js';
 import RoomRoutes from './routes/room.js';
+import ArtworkRoutes from './routes/artwork.js';
 import {notFound, errorHandler} from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -14,6 +17,9 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+
+const upload = multer({ dest: 'uploads/' });
 
 const PORT = process.env.PORT || 5000;
 
@@ -23,6 +29,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/users', UserRoutes);
 app.use('/api/rooms', RoomRoutes);
+app.use('/api/artworks', ArtworkRoutes);
 
 // connect db
 (async () => {
