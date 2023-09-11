@@ -23,6 +23,12 @@ const artworkSchema = new mongoose.Schema({
     required: true,
   },
 
+
+  // owner: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'User', // Reference to the User model
+  //   required: true,
+  // },
 }, {
   timestamps: true
 });
@@ -30,3 +36,13 @@ const artworkSchema = new mongoose.Schema({
 const Artwork = new mongoose.model('Artwork', artworkSchema);
 
 export default Artwork;
+
+
+
+// title: String,
+//   description: String,
+//   filename: String, // Original filename
+//   mimeType: String, // MIME type (e.g., image/jpeg)
+//   sizeInBytes: Number,
+  // Store binary data or reference to external storage URL
+  // mediaContent: Buffer, or mediaContentUrl: String,

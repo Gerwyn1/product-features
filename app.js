@@ -2,8 +2,8 @@ import express from 'express';
 import cors from "cors";
 import 'dotenv/config'
 import cookieParser from 'cookie-parser';
-import multer from 'multer';
 import morgan from 'morgan';
+
 
 import connectDB from './connectDb/connectDb.js';
 import UserRoutes from './routes/user.js';
@@ -18,8 +18,9 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+// app.use('/uploads', express.static('uploads'));
+// app.use('/media', express.static('path_to_media_directory'));
 
-const upload = multer({ dest: 'uploads/' });
 
 const PORT = process.env.PORT || 5000;
 
@@ -39,7 +40,6 @@ app.use('/api/artworks', ArtworkRoutes);
     console.error('An error occurred during database connection:', error);
   }
 })();
-
 
 app.use(notFound);
 app.use(errorHandler);
