@@ -19,7 +19,7 @@ const artworkSchema = new mongoose.Schema({
     type: String,
   },
   image: {
-    type: Buffer, // Store image binary data as a Buffer
+    type: String,
     required: true,
   },
 

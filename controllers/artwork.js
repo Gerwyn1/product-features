@@ -1,14 +1,12 @@
-import asyncHandler from 'express-async-handler';
 import fs from 'fs';
-import reverse from 'buffer-reverse';
 import { promisify } from 'util';
-import path from 'path';
+import asyncHandler from 'express-async-handler';
 
 import ArtworkModel from "../models/artwork.js";
 
-// const imageBuffer = fs.readFileSync('path/to/image.jpg');
-
 const writeFileAsync = promisify(fs.writeFile);
+const readFileAsync = promisify(fs.readFile);
+const unlinkFileAsync = promisify(fs.unlink);
 
 const getAllArtworks = asyncHandler(async (_, res) => {
   const artworks = await ArtworkModel.find({});
@@ -23,60 +21,22 @@ const createArtwork = asyncHandler(async (req, res) => {
     medium,
     description,
   } = req.body;
- 
+
   if (!req.file) {
     res.status(404);
     throw new Error('Image not found');
   }
 
-  const uploadedImagePath = req.file.path; // './uploads/images/'
-  const imageBuffer = await fs.promises.readFile(uploadedImagePath);
-
-  // TESTING:
-  // Reverse the contents of the image buffer
-  const reversedImageBuffer = reverse(imageBuffer); // <Buffer d9 ff 7f ea a1 81 77 d4 50 e3 81 ba 2d c0 91 80 b9 ad 0e 31 f6 1d 99 d9 06 f2 f1 68 f5 41 ad f8 83 c1 55 5f f5 04 4a f8 37 bd d4 87 0b fe 09 fe be eb ... 856479 more bytes>
- 
-  // Determine the image format (e.g., JPEG) and file extension
-const imageFormat = 'jpeg';
-const fileExtension = 'jpg';
-
-// Generate a filename with a unique name (you may customize this)
-const filename = path.resolve('.', `reversed_image.${fileExtension}`);
-
-// Save the reversed buffer to a file
-await writeFileAsync(filename, reversedImageBuffer);
-
-// Set the appropriate content type for the response
-const contentType = `image/${imageFormat}`;
-
-// Now, you can send the image as a response with the correct content type
-// console.log(res.contentType(contentType))
-res.contentType(contentType);
-res.sendFile(filename);
-res.end(filename);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  const uploadedImagePath = req.file.path; // 'uploads\images\1694487585110.jpg'
+  const imageTimeStamp = uploadedImagePath.slice(15); // '1694487585110.jpg'
+  
   const artwork = await ArtworkModel.create({
     title,
     artist,
     year,
     medium,
     description,
-    image: imageBuffer
+    image: imageTimeStamp
   });
 
   if (!artwork) {
@@ -87,13 +47,9 @@ res.end(filename);
   await artwork.save();
 
   // Cleanup: Remove the uploaded image file from the file system (if needed)
-  await fs.promises.unlink(uploadedImagePath);
+  await unlinkFileAsync(uploadedImagePath);
 
-  // Exclude a specific field (e.g., "image") before sending the JSON response
-  const artworkCopy = { ...artwork };
-  delete artworkCopy._doc.image;
-
-  res.status(201).json(artworkCopy._doc);
+  res.status(201).json(artwork);
 });
 
 const updateArtwork = asyncHandler(async (req, res) => {

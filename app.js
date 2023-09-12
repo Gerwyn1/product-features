@@ -18,9 +18,7 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
-// app.use('/uploads', express.static('uploads'));
-// app.use('/media', express.static('path_to_media_directory'));
-
+app.use('/uploads', express.static('uploads'));
 
 const PORT = process.env.PORT || 5000;
 
