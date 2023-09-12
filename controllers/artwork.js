@@ -30,12 +30,11 @@ const createArtwork = asyncHandler(async (req, res) => {
     throw new Error('Image not found');
   }
 
-  const imagePath = req.file.path.replace(/\\/g, '/'); // 'uploads/images/1694487585110.jpg'
-  const imageTimestamp = imagePath.split('/').pop().split('.').shift(); // '1694487585110'
-
+  const imagePath = req.file.path; // C:/Users/gerwy/AppData/Local/Temp/1694514790547.jpg
+  const imageTimestamp = imagePath.replace(/\\/g, "/").split("/").pop().split(".").shift(); // '1694487585110'
   const imageDestinationPath = "/uploads/images/" + imageTimestamp + ".png";
-  const imageBuffer = await readFileAsync(req.file.path);
-  await sharp(imageBuffer).png({palette: true}).toFile("./" + `${imageDestinationPath}`)
+  const imageBuffer = await readFileAsync(imagePath);
+  await sharp(imageBuffer.buffer).png({palette: true}).toFile("./" + `${imageDestinationPath}`)
 
   const artwork = await ArtworkModel.create({
     title,
