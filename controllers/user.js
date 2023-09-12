@@ -8,9 +8,7 @@ const getAllUsers = asyncHandler(async (_,res) => {
   res.status(200).json(users);
 });
 
-// @desc    Auth user & get token (login)
-// @route   POST /api/users/auth
-// @access  Public
+// auth user & get token (login)
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -30,9 +28,7 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Logout user / clear cookie
-// @route   POST /api/users/logout
-// @access  Public
+// logout user / clear cookie
 const logoutUser = (_, res) => {
   res.cookie('jwt', '', {
     httpOnly: true,
@@ -40,11 +36,9 @@ const logoutUser = (_, res) => {
   });
   res.status(200).json({message : 'User successfully logged out'})};
 
-// @desc    Register a new user
-// @route   POST /api/users
-// @access  Public
+// register a new user
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, roles } = req.body;
+  const { name, email, password, roles } = req.body; 
 
   if (!name || !email || !password) {
     res.status(400)
@@ -52,6 +46,12 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const userExists = await UserModel.findOne({ email });
+
+
+ // verify email (valid email or not) -  nodemailer (verification code) - second step
+ // user pw expires every 3 (changeable by admin) months after email is confirmed (first login)
+ // don't re-use pw (pw history)
+ // admin can disable user account (user can't login) - its kinda like banning
 
   if (userExists) {
     res.status(400);
@@ -66,8 +66,7 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (user) {
-    generateToken(res, user._id);
-
+    generateToken(res, user._id); // first step
     res.status(201).json({
       _id: user._id,
       name: user.name,
@@ -80,9 +79,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get user profile
-// @route   GET /api/users/profile
-// @access  Private
+// get user profile
 const getUserProfile = asyncHandler(async (req, res) => {
   const user = await UserModel.findById(req.user?._id);
 
@@ -98,9 +95,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update user profile
-// @route   PUT /api/users/profile
-// @access  Private
+// update user profile
 const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await UserModel.findById(req.user?._id);
 
@@ -125,6 +120,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+// delete user
 const deleteUser = asyncHandler(async (req, res) => {
   const result = await UserModel.deleteOne({_id: req.params.id});
 

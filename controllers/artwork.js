@@ -1,12 +1,15 @@
 import fs from 'fs';
-import { promisify } from 'util';
+import {
+  promisify
+} from 'util';
 import asyncHandler from 'express-async-handler';
+import sharp from 'sharp';
 
 import ArtworkModel from "../models/artwork.js";
 
-const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
-const unlinkFileAsync = promisify(fs.unlink);
+// const writeFileAsync = promisify(fs.writeFile);
+// const unlinkFileAsync = promisify(fs.unlink);
 
 const getAllArtworks = asyncHandler(async (_, res) => {
   const artworks = await ArtworkModel.find({});
@@ -27,16 +30,20 @@ const createArtwork = asyncHandler(async (req, res) => {
     throw new Error('Image not found');
   }
 
-  const uploadedImagePath = req.file.path; // 'uploads\images\1694487585110.jpg'
-  const imageTimeStamp = uploadedImagePath.slice(15); // '1694487585110.jpg'
-  
+  const imagePath = req.file.path.replace(/\\/g, '/'); // 'uploads/images/1694487585110.jpg'
+  const imageTimestamp = imagePath.split('/').pop().split('.').shift(); // '1694487585110'
+
+  const imageDestinationPath = "/uploads/images/" + imageTimestamp + ".png";
+  const imageBuffer = await readFileAsync(req.file.path);
+  await sharp(imageBuffer).png({palette: true}).toFile("./" + `${imageDestinationPath}`)
+
   const artwork = await ArtworkModel.create({
     title,
     artist,
     year,
     medium,
     description,
-    image: imageTimeStamp
+    image: imageDestinationPath
   });
 
   if (!artwork) {
@@ -45,9 +52,6 @@ const createArtwork = asyncHandler(async (req, res) => {
   }
 
   await artwork.save();
-
-  // Cleanup: Remove the uploaded image file from the file system (if needed)
-  await unlinkFileAsync(uploadedImagePath);
 
   res.status(201).json(artwork);
 });

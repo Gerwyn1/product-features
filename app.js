@@ -4,7 +4,6 @@ import 'dotenv/config'
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 
-
 import connectDB from './connectDb/connectDb.js';
 import UserRoutes from './routes/user.js';
 import RoomRoutes from './routes/room.js';
@@ -15,7 +14,6 @@ const app = express();
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use('/uploads', express.static('uploads'));

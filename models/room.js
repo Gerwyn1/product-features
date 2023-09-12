@@ -4,6 +4,7 @@ const roomSchema = new mongoose.Schema({
   size: {
     type: String,
     enum: ['small', 'medium', 'large'],
+     // small - 10, medium - 20, large - 30 <---- editable by admin
   },
   customSize: {
     type: String,
