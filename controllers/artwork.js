@@ -1,15 +1,17 @@
-import fs from 'fs';
-import {
-  promisify
-} from 'util';
 import asyncHandler from 'express-async-handler';
-import sharp from 'sharp';
 
 import ArtworkModel from "../models/artwork.js";
+import convertImagePath from '../utils/convertImagePath.js';
 
-const readFileAsync = promisify(fs.readFile);
-// const writeFileAsync = promisify(fs.writeFile);
-// const unlinkFileAsync = promisify(fs.unlink);
+const getArtwork = asyncHandler(async (req, res) => {
+  const artwork = await ArtworkModel.findOne({_id : req.params?.id});
+  if (!artwork) {
+    res.status(404);
+    throw new Error('Artwork not found');
+  }
+  
+  res.status(200).json(artwork);
+});
 
 const getAllArtworks = asyncHandler(async (_, res) => {
   const artworks = await ArtworkModel.find({});
@@ -24,17 +26,15 @@ const createArtwork = asyncHandler(async (req, res) => {
     medium,
     description,
   } = req.body;
+  
+  const file = req.file;
 
-  if (!req.file) {
+  if (!file) {
     res.status(404);
     throw new Error('Image not found');
   }
 
-  const imagePath = req.file.path; // C:/Users/gerwy/AppData/Local/Temp/1694514790547.jpg
-  const imageTimestamp = imagePath.replace(/\\/g, "/").split("/").pop().split(".").shift(); // '1694487585110'
-  const imageDestinationPath = "/uploads/images/" + imageTimestamp + ".png";
-  const imageBuffer = await readFileAsync(imagePath);
-  await sharp(imageBuffer.buffer).png({palette: true}).toFile("./" + `${imageDestinationPath}`)
+  const imagePngPath = await convertImagePath(file); // '/uploads/images/1694575721155.png'
 
   const artwork = await ArtworkModel.create({
     title,
@@ -42,7 +42,7 @@ const createArtwork = asyncHandler(async (req, res) => {
     year,
     medium,
     description,
-    image: imageDestinationPath
+    image: imagePngPath
   });
 
   if (!artwork) {
@@ -63,8 +63,16 @@ const updateArtwork = asyncHandler(async (req, res) => {
     year,
     medium,
     description,
-    image
   } = req.body;
+
+  const file = req.file;
+
+  if (!file) {
+    res.status(404);
+    throw new Error('Image not found');
+  }
+
+  const imagePngPath = await convertImagePath(file); // '/uploads/images/1694575721155.png'
 
   if (artwork) {
     artwork.title = title || artwork.title;
@@ -72,7 +80,7 @@ const updateArtwork = asyncHandler(async (req, res) => {
     artwork.year = year || artwork.year;
     artwork.medium = medium || artwork.medium;
     artwork.description = description || artwork.description;
-    artwork.image = image || artwork.image;
+    artwork.image = imagePngPath || artwork.image;
 
     const updatedArtwork = await artwork.save();
 
@@ -107,6 +115,7 @@ const deleteArtwork = asyncHandler(async (req, res) => {
 });
 
 export {
+  getArtwork,
   getAllArtworks,
   createArtwork,
   updateArtwork,
