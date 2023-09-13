@@ -4,7 +4,7 @@ import path from 'path';
 export const imageUpload = multer({
   storage: multer.diskStorage({
     // destination: function (req, file, cb) {
-    //   cb(null, './uploads/images/'); // changes "C:/Users/gerwy/AppData/Local/Temp/1694514790547.jpg" to "./uploads/images/1694514790547.jpg
+    //   cb(null, './uploads/images/'); // changes "C:/Users/[user]/AppData/Local/Temp/1694514790547.jpg" to "./uploads/images/1694514790547.jpg"
     // },
     filename: function (req, file, cb) {
       cb(null, Date.now() + path.extname(file.originalname));

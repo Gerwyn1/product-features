@@ -17,7 +17,7 @@ router.get('/size/:roomSize', RoomController.getSpecificRooms);
 router.get('/', RoomController.getAllRooms);
 
 // create room
-router.post('/', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin), RoomController.createRoom);
+router.post('/', protect, checkUserRole(ROLES_LIST.user, ROLES_LIST.moderator, ROLES_LIST.admin), RoomController.createRoom);
 
 // delete room
 router.delete('/:id', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin),RoomController.deleteRoom);

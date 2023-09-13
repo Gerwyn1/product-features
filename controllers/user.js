@@ -38,9 +38,9 @@ const logoutUser = (_, res) => {
 
 // register a new user
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, roles } = req.body; 
+  const { username, first_name, last_name, email, password, mobile_no, company_name, address_1, address_2, country, postcode, is_verified, roles } = req.body; 
 
-  if (!name || !email || !password) {
+  if (!username || !first_name || !last_name || !email || !password) {
     res.status(400)
     throw new Error('Please add all fields')
   }
@@ -58,21 +58,23 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('User already exists');
   }
 
-  const user = await UserModel.create({
-    name,
-    email,
-    password,
-    roles
-  });
+  const user = await UserModel.create(req.body);
+  // const user = await UserModel.create({
+  //   username,
+  //   email,
+  //   password,
+  //   roles
+  // });
 
   if (user) {
     generateToken(res, user._id); // first step
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      roles,
-    });
+    res.status(201).json(user);
+    // res.status(201).json({
+    //   _id: user._id,
+    //   name: user.name,
+    //   email: user.email,
+    //   roles,
+    // });
   } else {
     res.status(400);
     throw new Error('Invalid user data');

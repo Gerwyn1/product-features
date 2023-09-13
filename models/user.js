@@ -3,7 +3,16 @@ import bcrypt from "bcryptjs";
 
 //user schema
 const userSchema = new mongoose.Schema({
-  name: {
+  username: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  first_name: {
+    type: String,
+    required: true
+  },
+  last_name: {
     type: String,
     required: true
   },
@@ -16,11 +25,24 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-    roles : {
-      type: [String],
-      default: ['user'] 
-    }
-}, {timestamps: true})
+  roles: {
+    type: [String],
+    default: ['user']
+  },
+  postcode: {
+    type: String,
+    minLength: 6,
+    maxLength: 10
+  },
+  mobile_no: Number,
+  address_1: String,
+  address_2: String,
+  company_name: String,
+  country: String,
+  is_verified: Boolean,
+}, {
+  timestamps: true
+})
 
 // Match user entered password to hashed password in database
 userSchema.methods.matchPassword = async function (enteredPassword) {
