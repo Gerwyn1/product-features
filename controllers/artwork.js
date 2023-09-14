@@ -84,7 +84,7 @@ const updateArtwork = asyncHandler(async (req, res) => {
 
     const updatedArtwork = await artwork.save();
 
-    res.json({
+    res.status(200).json({
       _id: updatedArtwork._id,
       title: updatedArtwork.title,
       artist: updatedArtwork.artist,

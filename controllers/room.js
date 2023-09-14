@@ -1,18 +1,13 @@
 import asyncHandler from 'express-async-handler';
 
 import RoomModel from '../models/room.js';
-
-const Room1 = require('../models/roomModel');
+import {ROOM_SIZE} from '../config/room_size.js';
 
 const getRoom = asyncHandler(async (req, res) => {
   const room = await RoomModel.findOne({
     _id: req.params?.id
   });
-  // Access the computed dynamicValue property
-  // const computedDynamicValue = room.computedDynamicValue;
 
-  // Now, you can use the computedDynamicValue in your code
-  // console.log('Computed Dynamic Value:', computedDynamicValue);
   if (!room) {
     res.status(404);
     throw new Error('Room not found');
@@ -50,28 +45,23 @@ const getSpecificRooms = asyncHandler(async (req, res) => {
 
 const createRoom = asyncHandler(async (req, res) => {
   let {
-    size,
-    sizeNumber,
-    customSize
+    sizeName,
+    sizeValue,
+    customSize,
   } = req.body;
-  // const prop = (customSize ? 'customSize' : small? 'small' : medium? 'medium' : large ? 'large' : null);
 
-  // const room = await RoomModel.create({
-  //   [prop]: customSize ? customSize : small ? small : medium ? medium : large ? large : null,
-  // });
-  sizeNumber = size === 'small' ? 10 : size === 'medium' ? 20 : size === 'large' ? 30 : null;
-
+  sizeValue = ROOM_SIZE[sizeName];
+  
   const room = await RoomModel.create({
-    size,
-    sizeNumber,
-    ...(customSize && {
-      customSize
-    })
+    ...( customSize ? {customSize} : {
+      sizeName,
+      sizeValue
+    }),
   });
 
-  if (!room || (!customSize && !size && !sizeNumber && !customSize)) {
+  if (!room || (!sizeName && !sizeValue && !customSize)) {
     res.status(400);
-    throw new Error('Invalid room data');
+    throw new Error('Missing room data');
   }
 
   res.status(201).json(room);
@@ -92,10 +82,38 @@ const deleteRoom = asyncHandler(async (req, res) => {
   });
 });
 
+const updateRoomSizes = asyncHandler(async (req, res) => {
+  try {
+    await RoomModel.updateMany(
+      { sizeName: 'small' },
+      { $set: { sizeValue: 15 } },
+      { upsert: true }
+    );
+
+    await RoomModel.updateMany(
+      { sizeName: 'medium' },
+      { $set: { sizeValue: 25 } },
+      { upsert: true }
+    );
+
+    await RoomModel.updateMany(
+      { sizeName: 'large' },
+      { $set: { sizeValue: 35 } },
+      { upsert: true }
+    );
+
+    res.status(200).json({message:'Room sizes created/updated successfully'});
+  } catch (error) {
+    res.status(500);
+    throw new Error('Error updating room sizes');
+  }
+});
+
 export {
   getRoom,
   getAllRooms,
   getSpecificRooms,
   createRoom,
-  deleteRoom
+  deleteRoom,
+  updateRoomSizes
 }
