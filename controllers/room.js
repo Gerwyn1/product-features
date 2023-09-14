@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler';
 
 import RoomModel from '../models/room.js';
-import {ROOM_SIZE} from '../config/room_size.js';
+// import {ROOM_SIZE} from '../config/room_size.js';
 
 const getRoom = asyncHandler(async (req, res) => {
   const room = await RoomModel.findOne({
@@ -50,8 +50,12 @@ const createRoom = asyncHandler(async (req, res) => {
     customSize,
   } = req.body;
 
-  sizeValue = ROOM_SIZE[sizeName];
-  
+  RoomModel.setSize();
+
+  //qpowdjqopwdjqopwd
+
+  // sizeValue = ROOM_SIZE[sizeName];
+  //asdasdasdaasdsdww
   const room = await RoomModel.create({
     ...( customSize ? {customSize} : {
       sizeName,
