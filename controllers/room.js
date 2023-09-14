@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler';
 
 import RoomModel from '../models/room.js';
-// import {ROOM_SIZE} from '../config/room_size.js';
+import { roomSchema } from '../models/room.js';
 
 const getRoom = asyncHandler(async (req, res) => {
   const room = await RoomModel.findOne({
@@ -44,18 +44,19 @@ const getSpecificRooms = asyncHandler(async (req, res) => {
 });
 
 const createRoom = asyncHandler(async (req, res) => {
-  let {
+  const {
     sizeName,
     sizeValue,
     customSize,
   } = req.body;
 
-  RoomModel.setSize();
+  // if (req.user.roles.includes('admin')) {
+  //   RoomModel.setSize(15, 25, 35);
+  // }
+  RoomModel.setSize(152, undefined, 300);
 
-  //qpowdjqopwdjqopwd
+  console.log(roomSchema.path('ROOM_SIZE.large').defaultValue)
 
-  // sizeValue = ROOM_SIZE[sizeName];
-  //asdasdasdaasdsdww
   const room = await RoomModel.create({
     ...( customSize ? {customSize} : {
       sizeName,

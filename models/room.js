@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
-// import {
-//   ROOM_SIZE
-// } from '../config/room_size.js';
 
-
-const roomSchema = new mongoose.Schema({
+export const roomSchema = new mongoose.Schema({
   name: String,
   artwork_limit: String,
   filename: String,
@@ -46,23 +42,19 @@ const roomSchema = new mongoose.Schema({
   timestamps: true
 });
 
-roomSchema.statics.setSize = function setSize(name, cb) {
-  console.log('set sizing works')
-  console.log('this: ', this.prototype.obj)
-  // return this.where('name', new RegExp(name, 'i')).exec(cb);
-};
+// // Change default sizes by admin 
+// roomSchema.statics.setSize = (small = roomSchema.path('ROOM_SIZE.small').defaultValue, medium = roomSchema.path('ROOM_SIZE.medium').defaultValue, large = roomSchema.path('ROOM_SIZE.large').defaultValue) => {
+//   roomSchema.path('ROOM_SIZE.small').defaultValue = small;
+//   roomSchema.path('ROOM_SIZE.medium').defaultValue = medium;
+//   roomSchema.path('ROOM_SIZE.large').defaultValue = large;
+// }
 
 // Middleware to update sizeNumber based on size
 roomSchema.pre('save', function (next) {
-  console.log(this) // instance of model
   this.sizeValue = this.ROOM_SIZE[this.sizeName];
   next();
 });
 
 const Room = new mongoose.model('Room', roomSchema);
-
-console.log(roomSchema.obj.ROOM_SIZE.small.default);
-
-
 
 export default Room;
