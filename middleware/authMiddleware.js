@@ -48,7 +48,17 @@ const checkUserRole = (...allowedRoles) => {
   });
 };
 
+const checkIfPasswordExpired = (req, res, next) => { 
+  if (req.user.passwordExpiresAt <= Date.now()) {
+    res.status(401);
+    throw new Error('Password expired, please change your password');
+  }
+
+  next();
+ }
+
 export {
   protect,
-  checkUserRole
+  checkUserRole,
+  checkIfPasswordExpired
 }
