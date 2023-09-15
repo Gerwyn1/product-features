@@ -26,7 +26,7 @@ router.delete('/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.d
 router
 .route('/profile')
 .get(protect, checkUserRole(ROLES_LIST.user), UserController.getUserProfile)
-.put(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin), UserController.updateUserProfile);
+.patch(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin), UserController.updateUserProfile);
 
 
 export default router;

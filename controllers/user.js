@@ -46,7 +46,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const userExists = await UserModel.findOne({ email });
 
-
  // verify email (valid email or not) -  nodemailer (verification code) - second step
  // user pw expires every 3 (changeable by admin) months after email is confirmed (first login)
  // don't re-use pw (pw history)
