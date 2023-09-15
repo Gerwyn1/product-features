@@ -23,6 +23,6 @@ router.post('/', protect, checkUserRole(ROLES_LIST.user, ROLES_LIST.moderator, R
 router.delete('/:id', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin),RoomController.deleteRoom);
 
 // update all room sizes
-router.put('/update', protect, checkUserRole(ROLES_LIST.admin), RoomController.updateRoomSizes);
+router.patch('/update', protect, checkUserRole(ROLES_LIST.admin), RoomController.updateRoomSizes);
 
 export default router;

@@ -1,8 +1,8 @@
 import asyncHandler from 'express-async-handler';
 import RoomModel from '../models/room.js';
-import { roomSchema } from '../models/room.js';
-
-import mongoose from 'mongoose';
+import {
+  roomSchema
+} from '../models/room.js';
 
 const getRoom = asyncHandler(async (req, res) => {
   const room = await RoomModel.findOne({
@@ -51,7 +51,9 @@ const createRoom = asyncHandler(async (req, res) => {
   } = req.body;
 
   const room = await RoomModel.create({
-    ...( customSize ? {customSize} : {
+    ...(customSize ? {
+      customSize
+    } : {
       sizeName,
       sizeValue
     }),
@@ -69,72 +71,100 @@ const deleteRoom = asyncHandler(async (req, res) => {
   const result = await RoomModel.deleteOne({
     _id: req.params.id
   });
-
+  
   if (result.deletedCount === 0) {
     res.status(404);
     throw new Error('Room not found');
   }
-
+  
   res.status(200).json({
     message: 'Room successfully deleted'
   });
 });
 
 const updateRoomSizes = asyncHandler(async (req, res) => {
+  console.log('PATCH REQUEST: ')
+  console.log('--------------------------------------------------')
+
+  console.log('BEFORE MODIFY ROOM_SIZE')
+  
 
   console.log(roomSchema.path('ROOM_SIZE.small').defaultValue)
-  // roomSchema.path('ROOM_SIZE.small').default(24)
+  console.log(roomSchema.path('ROOM_SIZE.medium').defaultValue)
+  console.log(roomSchema.path('ROOM_SIZE.large').defaultValue)
 
-  roomSchema = roomSchema.add({
+  roomSchema.add({
     // Add or modify fields as needed
     ROOM_SIZE: {
       small: {
         type: Number,
-        default: 18
+        default: Math.floor(Math.random() * (25 - 10 + 1)) + 10
       },
       medium: {
         type: Number,
-        default: 24
+        default: Math.floor(Math.random() * (45 - 30 + 1)) + 30
       },
       large: {
         type: Number,
-        default: 34
+        default: Math.floor(Math.random() * (65 - 50 + 1)) + 50
       }
     },
   });
 
-  // console.log(roomSchema.path('ROOM_SIZE.small').options.default)
+  console.log('AFTER MODIFY ROOM_SIZE')
+
   console.log(roomSchema.path('ROOM_SIZE.small').defaultValue)
-  console.log(req.body.ROOM_SIZE.small)
+  console.log(roomSchema.path('ROOM_SIZE.medium').defaultValue)
+  console.log(roomSchema.path('ROOM_SIZE.large').defaultValue)
+
+
+
   try {
-    await RoomModel.updateMany(
-      { sizeName: 'small' },
-      { $set: { sizeValue: req.body.ROOM_SIZE.small,
-
-        // 'ROOM_SIZE.small.default': req.body.ROOM_SIZE.small,
-                ROOM_SIZE: {
-                  small: req.body.ROOM_SIZE.small,
-                  medium: roomSchema.path('ROOM_SIZE.medium').defaultValue,
-                  large: roomSchema.path('ROOM_SIZE.large').defaultValue
-                }
-      } },
-      { upsert: true }
-    );
-    console.log(req.body.ROOM_SIZE.small)
-    console.log(roomSchema.path('ROOM_SIZE.small').defaultValue)
-    await RoomModel.updateMany(
-      { sizeName: 'medium' },
-      { $set: { sizeValue: req.body.medium } },
-      { upsert: true }
-    );
-
-    await RoomModel.updateMany(
-      { sizeName: 'large' },
-      { $set: { sizeValue: req.body.large } },
-      { upsert: true }
-    );
-
-    res.status(200).json({message:'Room sizes updated successfully'});
+    await RoomModel.updateMany({}, {
+      $set: {
+        ROOM_SIZE: {
+          small: roomSchema.path('ROOM_SIZE.small').defaultValue,
+          medium: roomSchema.path('ROOM_SIZE.medium').defaultValue,
+          large: roomSchema.path('ROOM_SIZE.large').defaultValue
+        }
+      }
+    }, {
+      upsert: true
+    });
+    await RoomModel.updateMany({
+      sizeName: "small"
+    }, {
+      $set: {
+        sizeValue: roomSchema.path('ROOM_SIZE.small').defaultValue,
+      }
+    }, {
+      upsert: true
+    });
+    await RoomModel.updateMany({
+      sizeName: "medium"
+    }, {
+      $set: {
+        sizeValue: roomSchema.path('ROOM_SIZE.medium').defaultValue,
+      }
+    }, {
+      upsert: true
+    });
+    await RoomModel.updateMany({
+      sizeName: "large"
+    }, {
+      $set: {
+        sizeValue: roomSchema.path('ROOM_SIZE.large').defaultValue,
+      }
+    }, {
+      upsert: true
+    });
+    
+    setTimeout(() => console.log('__________________________________________________'), 500)
+    
+   
+    res.status(200).json({
+      message: 'Room sizes updated successfully'
+    });
   } catch (error) {
     res.status(500);
     throw new Error('Error updating room sizes');
