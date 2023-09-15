@@ -13,7 +13,18 @@ const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await UserModel.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) {
+  if (!user) {
+    res.status(401);
+    throw new Error('Invalid email or password');
+  }
+
+  // check if user is banned
+  if (user.is_disabled) {
+    res.status(403);
+    throw new Error("Your account has been suspended. Please contact support for more information.");
+  }
+
+  if (await user.matchPassword(password)) {
     generateToken(res, user._id);
 
     res.status(200).json({
@@ -37,7 +48,7 @@ const logoutUser = (_, res) => {
 
 // register a new user
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, first_name, last_name, email, password, mobile_no, company_name, address_1, address_2, country, postcode, is_verified, roles } = req.body; 
+  const { username, first_name, last_name, email, password, mobile_no, company_name, address_1, address_2, country, postcode, is_verified, roles, is_disabled } = req.body; 
 
   if (!username || !first_name || !last_name || !email || !password) {
     res.status(400)
@@ -49,7 +60,8 @@ const registerUser = asyncHandler(async (req, res) => {
  // verify email (valid email or not) -  nodemailer (verification code) - second step
  // user pw expires every 3 (changeable by admin) months after email is confirmed (first login)
  // don't re-use pw (pw history)
- // admin can disable user account (user can't login) - its kinda like banning
+
+ // admin can disable user account (user can't login) - banning
 
   if (userExists) {
     res.status(400);
@@ -132,6 +144,31 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.status(200).json({message: 'User successfully deleted'});
 });
 
+const disableUser = asyncHandler(async (req, res) => {
+  const user = await UserModel.findById(req.params.id);
+
+  if (user.roles.includes('admin')) {
+    res.status(403);
+    throw new Error('Admin cannot be disabled');
+  }
+
+  if (user.is_disabled) {
+    res.status(403);
+    throw new Error('User is already disabled');
+  }
+
+  if (user) {
+    user.is_disabled = true;
+    await user.save();
+    res.status(200).json({message: 'User successfully disabled'});
+  }
+
+  else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
  export  {
   getAllUsers,
   registerUser,
@@ -140,4 +177,5 @@ const deleteUser = asyncHandler(async (req, res) => {
   deleteUser,
   getUserProfile,
   updateUserProfile,
+  disableUser
  }

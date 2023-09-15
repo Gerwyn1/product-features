@@ -28,5 +28,7 @@ router
 .get(protect, checkUserRole(ROLES_LIST.user), UserController.getUserProfile)
 .patch(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin), UserController.updateUserProfile);
 
+router.patch('/disable/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.disableUser);
+
 
 export default router;

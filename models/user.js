@@ -34,12 +34,19 @@ const userSchema = new mongoose.Schema({
     minLength: 6,
     maxLength: 10
   },
+  is_disabled: {
+    type: Boolean,
+    default: false
+  },
+  is_verified: {
+    type: Boolean,
+    default: false
+  },
   mobile_no: Number,
   address_1: String,
   address_2: String,
   company_name: String,
   country: String,
-  is_verified: Boolean,
 }, {
   timestamps: true
 })

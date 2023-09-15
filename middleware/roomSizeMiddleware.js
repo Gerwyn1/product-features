@@ -10,10 +10,6 @@ export const editDefaultRoomSize = (small = roomSchema.path('ROOM_SIZE.small').d
     roomSchema.path('ROOM_SIZE.small').defaultValue = small;
     roomSchema.path('ROOM_SIZE.medium').defaultValue = medium;
     roomSchema.path('ROOM_SIZE.large').defaultValue = large;
+    next()
   })
 }
-
-
-//awew
-
-// aspdaspodjspodjaposd

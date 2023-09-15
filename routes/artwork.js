@@ -7,10 +7,19 @@ import {
 
 const router = express.Router();
 
+// get specific artwork
 router.get('/:id', ArtworkController.getArtwork);
+
+// get all artworks
 router.get('/', ArtworkController.getAllArtworks);
+
+// create artwork
 router.post('/', imageUpload.single('artworkImage'), ArtworkController.createArtwork);
-router.post('/:id', imageUpload.single('artworkImage'), ArtworkController.updateArtwork);
+
+// update artwork
+router.patch('/:id', imageUpload.single('artworkImage'), ArtworkController.updateArtwork);
+
+// delete artwork
 router.delete('/:id', ArtworkController.deleteArtwork);
 
 export default router;
