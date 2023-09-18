@@ -4,11 +4,15 @@ import * as UserController from "../controllers/user.js";
 import { protect } from '../middleware/authMiddleware.js';
 import {ROLES_LIST} from "../config/roles_list.js";
 import {checkUserRole} from "../middleware/authMiddleware.js";
+import { requestVerificationCodeRateLimit } from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
 
 // get all users
 router.get('/', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin), UserController.getAllUsers);
+
+// request verification code
+router.post("/verification-code", requestVerificationCodeRateLimit, UserController.requestEmailVerificationCode);
 
 // register user
 router.post('/', UserController.registerUser);

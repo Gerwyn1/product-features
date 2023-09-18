@@ -1,17 +1,26 @@
+import crypto from "crypto";
 import asyncHandler from 'express-async-handler';
 
 import UserModel from '../models/user.js';
 import generateToken from '../utils/generateToken.js';
+import * as Email from "../utils/email.js";
+import EmailVerificationToken from "../models/emailVerificationToken.js";
+import PasswordResetToken from "../models/passwordResetToken.js";
 
-const getAllUsers = asyncHandler(async (_,res) => {
+const getAllUsers = asyncHandler(async (_, res) => {
   const users = await UserModel.find({});
   res.status(200).json(users);
 });
 
 // auth user & get token (login)
 const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  const user = await UserModel.findOne({ email });
+  const {
+    email,
+    password
+  } = req.body;
+  const user = await UserModel.findOne({
+    email
+  });
 
   if (!user) {
     res.status(401);
@@ -44,28 +53,54 @@ const logoutUser = (_, res) => {
     httpOnly: true,
     expires: new Date(0),
   });
-  res.status(200).json({message : 'User successfully logged out'})};
+  res.status(200).json({
+    message: 'User successfully logged out'
+  })
+};
 
 // register a new user
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, first_name, last_name, email, password, mobile_no, company_name, address_1, address_2, country, postcode, is_verified, roles, is_disabled } = req.body; 
+  const {
+    username,
+    first_name,
+    last_name,
+    email,
+    password,
+    mobile_no,
+    company_name,
+    address_1,
+    address_2,
+    country,
+    postcode,
+    is_verified,
+    roles,
+    is_disabled,
+    verificationCode
+  } = req.body;
 
   if (!username || !first_name || !last_name || !email || !password) {
     res.status(400)
     throw new Error('Please add all fields')
   }
 
-  const userExists = await UserModel.findOne({ email });
-
- // verify email (valid email or not) -  nodemailer (verification code) - second step
- // user pw expires every 3 (changeable by admin) months after email is confirmed (first login)
- // don't re-use pw (pw history)
-
- // admin can disable user account (user can't login) - banning
+  const userExists = await UserModel.findOne({
+    email
+  }); // first step
 
   if (userExists) {
     res.status(400);
     throw new Error('User already exists');
+  }
+
+  const emailVerificationToken = await EmailVerificationToken.findOne({
+    email,
+    verificationCode
+  }).exec();
+
+  if (!emailVerificationToken) {
+    throw createHttpError(400, "Verification code incorrect or expired.");
+  } else {
+    await emailVerificationToken.deleteOne();
   }
 
   const user = await UserModel.create(req.body);
@@ -134,16 +169,22 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
 // delete user
 const deleteUser = asyncHandler(async (req, res) => {
-  const result = await UserModel.deleteOne({_id: req.params.id});
+  const result = await UserModel.deleteOne({
+    _id: req.params.id
+  });
 
   if (result.deletedCount === 0) {
     res.status(404);
     throw new Error('User not found');
   }
 
-  res.status(200).json({message: 'User successfully deleted'});
+  res.status(200).json({
+    message: 'User successfully deleted'
+  });
 });
 
+
+// admin can disable user account (user can't login) - banning
 const disableUser = asyncHandler(async (req, res) => {
   const user = await UserModel.findById(req.params.id);
 
@@ -160,16 +201,110 @@ const disableUser = asyncHandler(async (req, res) => {
   if (user) {
     user.is_disabled = true;
     await user.save();
-    res.status(200).json({message: 'User successfully disabled'});
-  }
-
-  else {
+    res.status(200).json({
+      message: 'User successfully disabled'
+    });
+  } else {
     res.status(404);
     throw new Error('User not found');
   }
 });
 
- export  {
+const requestEmailVerificationCode = asyncHandler(async (req, res, next) => {
+  const {
+    email
+  } = req.body;
+
+  try {
+    const existingEmail = await UserModel.findOne({
+      email
+    }).collation({ locale: "en", strength: 2 })
+    .exec();
+
+    if (existingEmail) {
+      res.status(409);
+      throw new Error("A user with this email address already exists. Please log in instead.");
+    }
+
+    const verificationCode = crypto.randomInt(100000, 999999).toString();
+    await EmailVerificationToken.create({
+      email,
+      verificationCode
+    });
+
+    await Email.sendVerificationCode(email, verificationCode);
+
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+})
+
+const requestResetPasswordCode = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+      const user = await UserModel.findOne({ email })
+          .collation({ locale: "en", strength: 2 })
+          .exec();
+
+      if (!user) {
+          throw createHttpError(404, "A user with this email doesn't exist. Please sign up instead.");
+      }
+
+      const verificationCode = crypto.randomInt(100000, 999999).toString();
+      await PasswordResetToken.create({ email, verificationCode });
+
+      await Email.sendPasswordResetCode(email, verificationCode);
+
+      res.sendStatus(200);
+  } catch (error) {
+      next(error);
+  }
+})
+
+const resetPassword = asyncHandler(async (req, res, next) => {
+  const { email, password: newPasswordRaw, verificationCode } = req.body;
+
+  try {
+      const existingUser = await UserModel.findOne({ email }).select("+email")
+          .collation({ locale: "en", strength: 2 })
+          .exec();
+
+      if (!existingUser) {
+          throw createHttpError(404, "User not found");
+      }
+
+      const passwordResetToken = await PasswordResetToken.findOne({ email, verificationCode }).exec();
+
+      if (!passwordResetToken) {
+          throw createHttpError(400, "Verification code incorrect or expired.");
+      } else {
+          await passwordResetToken.deleteOne();
+      }
+
+      await destroyAllActiveSessionsForUser(existingUser._id.toString());
+
+      const newPasswordHashed = await bcrypt.hash(newPasswordRaw, 10);
+
+      existingUser.password = newPasswordHashed;
+
+      await existingUser.save();
+
+      const user = existingUser.toObject();
+
+      delete user.password;
+
+      req.logIn(user, error => {
+          if (error) throw error;
+          res.status(200).json(user);
+      });
+  } catch (error) {
+      next(error);
+  }
+})
+
+export {
   getAllUsers,
   registerUser,
   authUser,
@@ -177,5 +312,8 @@ const disableUser = asyncHandler(async (req, res) => {
   deleteUser,
   getUserProfile,
   updateUserProfile,
-  disableUser
- }
+  disableUser,
+  requestEmailVerificationCode,
+  requestResetPasswordCode,
+  resetPassword
+}
