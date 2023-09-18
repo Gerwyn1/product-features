@@ -1,11 +1,13 @@
 import crypto from "crypto";
 import asyncHandler from 'express-async-handler';
+import bcrypt from 'bcryptjs';
 
 import UserModel from '../models/user.js';
 import generateToken from '../utils/generateToken.js';
 import * as Email from "../utils/email.js";
 import EmailVerificationToken from "../models/emailVerificationToken.js";
 import PasswordResetToken from "../models/passwordResetToken.js";
+// import { destroyAllActiveSessionsForUser } from "../utils/auth";
 
 const getAllUsers = asyncHandler(async (_, res) => {
   const users = await UserModel.find({});
@@ -75,7 +77,7 @@ const registerUser = asyncHandler(async (req, res) => {
     is_verified,
     roles,
     is_disabled,
-    verificationCode
+    // verificationCode
   } = req.body;
 
   if (!username || !first_name || !last_name || !email || !password) {
@@ -92,16 +94,16 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('User already exists');
   }
 
-  const emailVerificationToken = await EmailVerificationToken.findOne({
-    email,
-    verificationCode
-  }).exec();
+  // const emailVerificationToken = await EmailVerificationToken.findOne({
+  //   email,
+  //   verificationCode
+  // }).exec();
 
-  if (!emailVerificationToken) {
-    throw createHttpError(400, "Verification code incorrect or expired.");
-  } else {
-    await emailVerificationToken.deleteOne();
-  }
+  // if (!emailVerificationToken) {
+  //   throw createHttpError(400, "Verification code incorrect or expired.");
+  // } else {
+  //   await emailVerificationToken.deleteOne();
+  // }
 
   const user = await UserModel.create(req.body);
   // const user = await UserModel.create({
@@ -283,7 +285,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
           await passwordResetToken.deleteOne();
       }
 
-      await destroyAllActiveSessionsForUser(existingUser._id.toString());
+      // await destroyAllActiveSessionsForUser(existingUser._id.toString());
 
       const newPasswordHashed = await bcrypt.hash(newPasswordRaw, 10);
 
@@ -295,10 +297,12 @@ const resetPassword = asyncHandler(async (req, res, next) => {
 
       delete user.password;
 
-      req.logIn(user, error => {
-          if (error) throw error;
-          res.status(200).json(user);
-      });
+      res.status(200).json(user);
+
+      // req.logIn(user, error => {
+      //     if (error) throw error;
+      //     res.status(200).json(user);
+      // });
   } catch (error) {
       next(error);
   }
