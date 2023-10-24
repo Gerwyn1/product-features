@@ -22,7 +22,7 @@ export let roomSchema = new mongoose.Schema({
     type: String,
     enum: ["small", "medium", "large"],
     required: function () {
-      return !this.customSize;
+      return !this.customSize; // if customSize not exist, then sizeName is required
     }
   },
   sizeValue: {
@@ -31,8 +31,8 @@ export let roomSchema = new mongoose.Schema({
   customSize: {
     type: String,
     validate: {
-      validator: function (value) {
-        if (!value || !(!isNaN(parseInt(value)) && parseInt(value) > 0)) { // if value not exist OR (not a number AND not greater than 0)
+      validator: function (value) { // validate if positive integer
+        if (!value || !(!isNaN(parseInt(value)) && parseInt(value) > 0)) { // if value not exist OR NOT(is a number AND greater than 0)
           throw new Error('Invalid custom size');
         }
       },
@@ -42,7 +42,7 @@ export let roomSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Change default sizes by admin 
+// Change default sizes by admin
 roomSchema.statics.setSize = (small = roomSchema.path('ROOM_SIZE.small').defaultValue, medium = roomSchema.path('ROOM_SIZE.medium').defaultValue, large = roomSchema.path('ROOM_SIZE.large').defaultValue) => {
   roomSchema.path('ROOM_SIZE.small').defaultValue = small;
   roomSchema.path('ROOM_SIZE.medium').defaultValue = medium;

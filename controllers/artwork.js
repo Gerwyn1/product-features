@@ -25,6 +25,12 @@ const createArtwork = asyncHandler(async (req, res) => {
     year,
     medium,
     description,
+    position,
+    dimension,
+    annotationClass,
+    rotateX,
+    rotateY,
+    rotateZ,
   } = req.body;
   
   const file = req.file;
@@ -42,7 +48,13 @@ const createArtwork = asyncHandler(async (req, res) => {
     year,
     medium,
     description,
-    image: imagePngPath
+    image: imagePngPath,
+    position,
+    dimension,
+    annotationClass,
+    rotateX,
+    rotateY,
+    rotateZ,
   });
 
   if (!artwork) {

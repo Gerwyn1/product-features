@@ -46,6 +46,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000) // 3 months ahead
   },
+  setting: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Setting',
+    required: true,
+  },
   mobile_no: Number,
   address_1: String,
   address_2: String,

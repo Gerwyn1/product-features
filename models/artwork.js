@@ -1,6 +1,13 @@
 import mongoose from 'mongoose';
 
 const artworkSchema = new mongoose.Schema({
+  position : String,
+  dimension : String,
+  annotationClass : String,
+  rotateX : String,
+  rotateY : String,
+  rotateZ : String,
+
   title: {
     type: String,
     required: true,
