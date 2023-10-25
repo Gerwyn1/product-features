@@ -9,7 +9,7 @@ import { requestVerificationCodeRateLimit } from "../middleware/rateLimitMiddlew
 const router = express.Router();
 
 // get all users
-router.get('/', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin), UserController.getAllUsers);
+router.get('/', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin, ROLES_LIST.user), UserController.getAllUsers);
 
 // request account verification code
 router.post("/verification-code", requestVerificationCodeRateLimit, UserController.requestEmailVerificationCode);
@@ -37,7 +37,10 @@ router
 .get(protect, checkUserRole(ROLES_LIST.user), UserController.getUserProfile)
 .patch(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin), UserController.updateUserProfile);
 
+// disable user
 router.patch('/disable/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.disableUser);
 
+// Change password expiry date
+router.patch('/change-password-expiry', protect, checkUserRole(ROLES_LIST.admin, ROLES_LIST.user), UserController.changePasswordExpiry);
 
 export default router;

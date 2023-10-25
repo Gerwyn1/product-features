@@ -1,12 +1,15 @@
 import crypto from "crypto";
 import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
+import createHttpError from "http-errors";
 
 import UserModel from '../models/user.js';
 import generateToken from '../utils/generateToken.js';
 import * as Email from "../utils/email.js";
 import EmailVerificationToken from "../models/emailVerificationToken.js";
 import PasswordResetToken from "../models/passwordResetToken.js";
+import {userSchema} from "../models/user.js";
+import { takeCoverage } from "v8";
 // import { destroyAllActiveSessionsForUser } from "../utils/auth";
 
 const getAllUsers = asyncHandler(async (_, res) => {
@@ -308,6 +311,34 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   }
 })
 
+const changePasswordExpiry = asyncHandler(async(req, res, next) => {
+  const { passwordExpiresAt } = req.body;
+  const defaultExpiryMs = new Date(userSchema.path('passwordExpiresAt').defaultValue).getTime();
+  const newExpiryMs = new Date(passwordExpiresAt).getTime()
+
+  if (newExpiryMs < defaultExpiryMs) {
+    throw createHttpError(400, "New Expiry date cannot be earlier than current expiry date.");
+  }
+
+  userSchema.add({
+    // Add or modify fields as needed
+    passwordExpiresAt: {
+      type: Date,
+      default: new Date(newExpiryMs) // at least 3 months ahead
+    },
+  });
+
+    await UserModel.updateMany({}, {
+      $set: {
+        passwordExpiresAt: userSchema.path('passwordExpiresAt').defaultValue,
+      }
+    }, {
+      upsert: true
+    });
+
+    res.status(200).json({message:'Expiry date successfully updated'});
+ });
+
 export {
   getAllUsers,
   registerUser,
@@ -319,5 +350,6 @@ export {
   disableUser,
   requestEmailVerificationCode,
   requestResetPasswordCode,
-  resetPassword
+  resetPassword,
+  changePasswordExpiry
 }

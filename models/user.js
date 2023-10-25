@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 //user schema
-const userSchema = new mongoose.Schema({
+export const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -44,12 +44,13 @@ const userSchema = new mongoose.Schema({
   },
   passwordExpiresAt: {
     type: Date,
-    default: new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000) // 3 months ahead
+    default: new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000), // 3 months ahead
+    required: true
   },
   setting: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Setting',
-    required: true,
+    // required: true,
   },
   mobile_no: Number,
   address_1: String,
