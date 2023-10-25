@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin, ROLES_LIST.user), UserController.getAllUsers);
 
 // request account verification code
-router.post("/verification-code", requestVerificationCodeRateLimit, UserController.requestEmailVerificationCode);
+router.post("/send-email-code", requestVerificationCodeRateLimit, UserController.requestEmailVerificationCode);
 
 // request reset pw code
 router.post("/reset-password-code", requestVerificationCodeRateLimit, UserController.requestResetPasswordCode);

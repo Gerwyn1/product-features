@@ -220,15 +220,13 @@ const requestEmailVerificationCode = asyncHandler(async (req, res, next) => {
     email
   } = req.body;
 
-  try {
-    const existingEmail = await UserModel.findOne({
+    const existingUser = await UserModel.findOne({
       email
     }).collation({ locale: "en", strength: 2 })
     .exec();
 
-    if (existingEmail) {
-      res.status(409);
-      throw new Error("A user with this email address already exists. Please log in instead.");
+    if (!existingUser) {
+      throw createHttpError(404, "A user with this email address does not exist. Please sign up instead.");
     }
 
     const verificationCode = crypto.randomInt(100000, 999999).toString();
@@ -237,35 +235,27 @@ const requestEmailVerificationCode = asyncHandler(async (req, res, next) => {
       verificationCode
     });
 
-    await Email.sendVerificationCode(email, verificationCode);
-
-    res.sendStatus(200);
-  } catch (error) {
-    next(error);
-  }
-})
+    await Email.sendEmailVerificationCode(email, verificationCode);
+    res.status(200).json({message: 'Email Verification code sent'});
+});
 
 const requestResetPasswordCode = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
 
-  try {
-      const user = await UserModel.findOne({ email })
+      const existingUser = await UserModel.findOne({ email })
           .collation({ locale: "en", strength: 2 })
           .exec();
 
-      if (!user) {
-          throw createHttpError(404, "A user with this email doesn't exist. Please sign up instead.");
+      if (!existingUser) {
+          throw createHttpError(404, "A user with this email address does not exist. Please sign up instead.");
       }
 
       const verificationCode = crypto.randomInt(100000, 999999).toString();
       await PasswordResetToken.create({ email, verificationCode });
 
-      await Email.sendPasswordResetCode(email, verificationCode);
+      await Email.sendPasswordVerificationCode(email, verificationCode);
 
-      res.sendStatus(200);
-  } catch (error) {
-      next(error);
-  }
+      res.status(200).json({message: 'Password Reset code sent'});
 })
 
 const resetPassword = asyncHandler(async (req, res, next) => {

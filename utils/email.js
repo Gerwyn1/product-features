@@ -9,11 +9,20 @@ const transporter = createTransport({
     },
 });
 
-export async function sendVerificationCode(toEmail, verificationCode) {
+export async function sendEmailVerificationCode(toEmail, verificationCode) {
     await transporter.sendMail({
         from: "noreply@blaklabs.com",
         to: toEmail,
-        subject: "Your verification code",
-        html: `<p>This is your verification code. It will expire in 10 minutes.</p><strong>${verificationCode}</strong>`
+        subject: "Your Email verification code",
+        html: `<p>This is your Email verification code. It will expire in 10 minutes.</p><strong>${verificationCode}</strong>`
+    });
+}
+
+export async function sendPasswordVerificationCode(toEmail, verificationCode) {
+    await transporter.sendMail({
+        from: "noreply@blaklabs.com",
+        to: toEmail,
+        subject: "Your Password verification code",
+        html: `<p>This is your Password verification code. It will expire in 10 minutes.</p><strong>${verificationCode}</strong>`
     });
 }
