@@ -219,7 +219,6 @@ const requestEmailVerificationCode = asyncHandler(async (req, res, next) => {
   const {
     email
   } = req.body;
-
     const existingUser = await UserModel.findOne({
       email
     }).collation({ locale: "en", strength: 2 })
@@ -238,6 +237,31 @@ const requestEmailVerificationCode = asyncHandler(async (req, res, next) => {
     await Email.sendEmailVerificationCode(email, verificationCode);
     res.status(200).json({message: 'Email Verification code sent'});
 });
+
+const verifyEmail = asyncHandler(async (req, res, next) => {
+  const { email, verificationCode } = req.body;
+
+  const existingUser = await UserModel.findOne({ email }).select("+email")
+      .collation({ locale: "en", strength: 2 })
+      .exec();
+
+  if (!existingUser) {
+      throw createHttpError(404, "User not found");
+  }
+
+  const emailVerificationToken = await EmailVerificationToken.findOne({ email, verificationCode }).exec();
+
+      if (!emailVerificationToken) {
+          throw createHttpError(400, "Verification code incorrect or expired.");
+      } else {
+          await emailVerificationToken.deleteOne();
+      }
+
+      existingUser.is_verified = true;
+      await existingUser.save();
+
+      res.status(200).json(existingUser);
+ });
 
 const requestResetPasswordCode = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
@@ -261,13 +285,16 @@ const requestResetPasswordCode = asyncHandler(async (req, res, next) => {
 const resetPassword = asyncHandler(async (req, res, next) => {
   const { email, password: newPasswordRaw, verificationCode } = req.body;
 
-  try {
       const existingUser = await UserModel.findOne({ email }).select("+email")
           .collation({ locale: "en", strength: 2 })
           .exec();
 
       if (!existingUser) {
           throw createHttpError(404, "User not found");
+      }
+
+      if (await existingUser.checkPasswordHistory(newPasswordRaw)) {
+        throw createHttpError(400, "Password has been used before and cannot be reused.");
       }
 
       const passwordResetToken = await PasswordResetToken.findOne({ email, verificationCode }).exec();
@@ -296,9 +323,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
       //     if (error) throw error;
       //     res.status(200).json(user);
       // });
-  } catch (error) {
-      next(error);
-  }
+  
 })
 
 const changePasswordExpiry = asyncHandler(async(req, res, next) => {
@@ -339,6 +364,7 @@ export {
   updateUserProfile,
   disableUser,
   requestEmailVerificationCode,
+  verifyEmail,
   requestResetPasswordCode,
   resetPassword,
   changePasswordExpiry

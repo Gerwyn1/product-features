@@ -11,13 +11,17 @@ const router = express.Router();
 // get all users
 router.get('/', protect, checkUserRole(ROLES_LIST.moderator, ROLES_LIST.admin, ROLES_LIST.user), UserController.getAllUsers);
 
-// request account verification code
+// request email verification code
 router.post("/send-email-code", requestVerificationCodeRateLimit, UserController.requestEmailVerificationCode);
 
-// request reset pw code
+// verify email
+router.patch("/verify-email", UserController.verifyEmail);
+
+// request reset password code
 router.post("/reset-password-code", requestVerificationCodeRateLimit, UserController.requestResetPasswordCode);
 
-router.post("/reset-password", UserController.resetPassword);
+// reset user password
+router.patch("/reset-password", UserController.resetPassword);
 
 // register user
 router.post('/', UserController.registerUser);

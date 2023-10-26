@@ -52,6 +52,10 @@ export const userSchema = new mongoose.Schema({
     ref: 'Setting',
     // required: true,
   },
+  passwordHistory : {
+    type: [String],
+    default: []
+  },
   mobile_no: Number,
   address_1: String,
   address_2: String,
@@ -66,16 +70,25 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Check if the entered password matches any previous passwords or the current password
+userSchema.methods.checkPasswordHistory = async function (enteredPassword) {
+  return await this.passwordHistory.some((prevPassword) => bcrypt.compareSync(enteredPassword, prevPassword));
+};
+
 // Encrypt password using bcrypt
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     next();
   }
+
   // if modified or creating pw
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+
+  // store hashed password in history
+  this.passwordHistory.push(this.password);
 });
 
-const User = new mongoose.model("User", userSchema)
+const User = new mongoose.model("User", userSchema);
 
 export default User;
