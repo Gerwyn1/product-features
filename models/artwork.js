@@ -7,7 +7,11 @@ const artworkSchema = new mongoose.Schema({
   rotateX : String,
   rotateY : String,
   rotateZ : String,
-
+  gallery_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Gallery',
+    required: true,
+  },
   title: {
     type: String,
     required: true,

@@ -188,7 +188,6 @@ const deleteUser = asyncHandler(async (req, res) => {
   });
 });
 
-
 // admin can disable user account (user can't login) - banning
 const disableUser = asyncHandler(async (req, res) => {
   const user = await UserModel.findById(req.params.id);

@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 
 import ArtworkModel from "../models/artwork.js";
 import convertImagePath from '../utils/convertImagePath.js';
+import createHttpError from 'http-errors';
 
 const getArtwork = asyncHandler(async (req, res) => {
   const artwork = await ArtworkModel.findOne({_id : req.params?.id});
@@ -32,15 +33,19 @@ const createArtwork = asyncHandler(async (req, res) => {
     rotateY,
     rotateZ,
   } = req.body;
-  
+
+  const user = req.user;
   const file = req.file;
 
-  if (!file) {
-    res.status(404);
-    throw new Error('Image not found');
+  if (!user) {
+    throw createHttpError(401, 'Not authorized, no user');
   }
 
-  const imagePngPath = await convertImagePath(file); // '/uploads/images/1694575721155.png'
+  if (!file) {
+    throw createHttpError(404, 'Image not found');
+  }
+
+  const imagePngPath = await convertImagePath(file, user._id); // '/uploads/images/1694575721155.png'
 
   const artwork = await ArtworkModel.create({
     title,
@@ -79,12 +84,13 @@ const updateArtwork = asyncHandler(async (req, res) => {
 
   const file = req.file;
 
-  if (!file) {
-    res.status(404);
-    throw new Error('Image not found');
-  }
+  // if (!file) {
+  //   res.status(404);
+  //   throw new Error('Image not found');
+  // }
 
-  const imagePngPath = await convertImagePath(file); // '/uploads/images/1694575721155.png'
+  
+  const imagePngPath = file ? await convertImagePath(file) : null; // '/uploads/images/1694575721155.png'
 
   if (artwork) {
     artwork.title = title || artwork.title;

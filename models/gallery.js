@@ -6,7 +6,7 @@ const gallerySchema = new mongoose.Schema({
     required: true
   },
   description: String,
-  roomtype_id: {
+  room_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
     required: true,

@@ -8,6 +8,7 @@ import connectDB from './connectDb/connectDb.js';
 import UserRoutes from './routes/user.js';
 import RoomRoutes from './routes/room.js';
 import ArtworkRoutes from './routes/artwork.js';
+import GalleryRoutes from './routes/gallery.js';
 import {notFound, errorHandler} from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -27,6 +28,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', UserRoutes);
 app.use('/api/rooms', RoomRoutes);
 app.use('/api/artworks', ArtworkRoutes);
+app.use('/api/galleries', GalleryRoutes);
 
 // connect db
 (async () => {
