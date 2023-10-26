@@ -4,6 +4,9 @@ import * as ArtworkController from "../controllers/artwork.js";
 import {
   imageUpload
 } from "../middleware/mediaMiddleware.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { checkUserRole } from "../middleware/authMiddleware.js";
+import {ROLES_LIST} from "../config/roles_list.js";
 
 const router = express.Router();
 
@@ -14,7 +17,7 @@ router.get('/:id', ArtworkController.getArtwork);
 router.get('/', ArtworkController.getAllArtworks);
 
 // create artwork
-router.post('/', imageUpload.single('artworkImage'), ArtworkController.createArtwork);
+router.post('/:galleryId', protect, checkUserRole(ROLES_LIST.user), imageUpload.single('artworkImage'), ArtworkController.createArtwork);
 
 // update artwork
 router.patch('/:id', imageUpload.single('artworkImage'), ArtworkController.updateArtwork);

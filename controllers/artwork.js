@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import asyncHandler from 'express-async-handler';
 
 import ArtworkModel from "../models/artwork.js";
@@ -20,6 +21,13 @@ const getAllArtworks = asyncHandler(async (_, res) => {
 });
 
 const createArtwork = asyncHandler(async (req, res) => {
+
+  const {galleryId} = req.params;
+
+  // if (!mongoose.Types.ObjectId.isValid(galleryId)) {
+  //   throw createHttpError(404, 'Gallery not found');
+  // }
+
   const {
     title,
     artist,
@@ -48,6 +56,7 @@ const createArtwork = asyncHandler(async (req, res) => {
   const imagePngPath = await convertImagePath(file, user._id); // '/uploads/images/1694575721155.png'
 
   const artwork = await ArtworkModel.create({
+    gallery_id: galleryId,
     title,
     artist,
     year,
