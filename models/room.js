@@ -42,8 +42,11 @@ export let roomSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Change default sizes by admin
-roomSchema.statics.setSize = (small = roomSchema.path('ROOM_SIZE.small').defaultValue, medium = roomSchema.path('ROOM_SIZE.medium').defaultValue, large = roomSchema.path('ROOM_SIZE.large').defaultValue) => {
+// Change schema default sizes by admin
+roomSchema.statics.updateSchemaDefaultRoomSizes = (
+  small = roomSchema.path('ROOM_SIZE.small').defaultValue,
+  medium = roomSchema.path('ROOM_SIZE.medium').defaultValue,
+  large = roomSchema.path('ROOM_SIZE.large').defaultValue) => {
   roomSchema.path('ROOM_SIZE.small').defaultValue = small;
   roomSchema.path('ROOM_SIZE.medium').defaultValue = medium;
   roomSchema.path('ROOM_SIZE.large').defaultValue = large;
@@ -55,48 +58,37 @@ roomSchema.pre('save', function (next) {
   next();
 });
 
-let Room = new mongoose.model('Room', roomSchema);
+const Room = new mongoose.model('Room', roomSchema);
 
 export default Room;
 
+// Default room sizes
 
+// Change database default sizes by admin
+roomSchema.statics.updateDatabaseDefaultRoomSizes = async () => {
+  const sizesToUpdate = {
+    "small": roomSchema.path('ROOM_SIZE.small').defaultValue,
+    "medium": roomSchema.path('ROOM_SIZE.medium').defaultValue,
+    "large": roomSchema.path('ROOM_SIZE.large').defaultValue,
+  };
+  await Room.updateMany({}, {
+    $set: {
+      ROOM_SIZE: {
+        small: roomSchema.path('ROOM_SIZE.small').defaultValue,
+        medium: roomSchema.path('ROOM_SIZE.medium').defaultValue,
+        large: roomSchema.path('ROOM_SIZE.large').defaultValue
+      }
+    }
+  });
+  for (const sizeName in sizesToUpdate) {
+    await Room.updateMany(
+      { sizeName },
+      {
+        $set: {
+          sizeValue: sizesToUpdate[sizeName],
+        }
+      }
+    );
+  }
+}
 
-// import mongoose from 'mongoose';
-
-// export let roomSchema = new mongoose.Schema({
-//   // ... your existing schema fields
-// }, {
-//   timestamps: true
-// });
-
-// // Change default sizes by admin 
-// roomSchema.statics.setSize = function(small, medium, large) {
-//   const updatedRoomSchema = new mongoose.Schema({
-//     ROOM_SIZE: {
-//       small: {
-//         type: Number,
-//         default: small
-//       },
-//       medium: {
-//         type: Number,
-//         default: medium
-//       },
-//       large: {
-//         type: Number,
-//         default: large
-//       }
-//     },
-//   });
-
-//   return mongoose.model('Room', updatedRoomSchema);
-// }
-
-// // Middleware to update sizeNumber based on size
-// roomSchema.pre('save', function (next) {
-//   // ... your existing middleware logic
-//   next();
-// });
-
-// let Room = new mongoose.model('Room', roomSchema);
-
-// export default Room;

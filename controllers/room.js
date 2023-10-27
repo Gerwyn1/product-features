@@ -83,92 +83,37 @@ const deleteRoom = asyncHandler(async (req, res) => {
 });
 
 const updateRoomSizes = asyncHandler(async (req, res) => {
-  console.log('PATCH REQUEST: ')
-  console.log('--------------------------------------------------')
+  // console.log('PATCH REQUEST: ')
+  // console.log('--------------------------------------------------')
 
-  console.log('BEFORE MODIFY ROOM_SIZE')
+  // console.log('BEFORE MODIFY ROOM_SIZE')
   
+  // console.log(roomSchema.path('ROOM_SIZE.small').defaultValue)
+  // console.log(roomSchema.path('ROOM_SIZE.medium').defaultValue)
+  // console.log(roomSchema.path('ROOM_SIZE.large').defaultValue)
 
-  console.log(roomSchema.path('ROOM_SIZE.small').defaultValue)
-  console.log(roomSchema.path('ROOM_SIZE.medium').defaultValue)
-  console.log(roomSchema.path('ROOM_SIZE.large').defaultValue)
+  // update schema default room sizes
+  roomSchema.statics.updateSchemaDefaultRoomSizes(
+    Math.floor(Math.random() * (25 - 10 + 1)) + 10,
+    Math.floor(Math.random() * (45 - 30 + 1)) + 30,
+    Math.floor(Math.random() * (65 - 50 + 1)) + 50
+);
 
-  roomSchema.add({
-    // Add or modify fields as needed
-    ROOM_SIZE: {
-      small: {
-        type: Number,
-        default: Math.floor(Math.random() * (25 - 10 + 1)) + 10
-      },
-      medium: {
-        type: Number,
-        default: Math.floor(Math.random() * (45 - 30 + 1)) + 30
-      },
-      large: {
-        type: Number,
-        default: Math.floor(Math.random() * (65 - 50 + 1)) + 50
-      }
-    },
-  });
+  // console.log('AFTER MODIFY ROOM_SIZE')
 
-  console.log('AFTER MODIFY ROOM_SIZE')
-
-  console.log(roomSchema.path('ROOM_SIZE.small').defaultValue)
-  console.log(roomSchema.path('ROOM_SIZE.medium').defaultValue)
-  console.log(roomSchema.path('ROOM_SIZE.large').defaultValue)
+  // console.log(roomSchema.path('ROOM_SIZE.small').defaultValue)
+  // console.log(roomSchema.path('ROOM_SIZE.medium').defaultValue)
+  // console.log(roomSchema.path('ROOM_SIZE.large').defaultValue)
 
 
-
-  try {
-    await RoomModel.updateMany({}, {
-      $set: {
-        ROOM_SIZE: {
-          small: roomSchema.path('ROOM_SIZE.small').defaultValue,
-          medium: roomSchema.path('ROOM_SIZE.medium').defaultValue,
-          large: roomSchema.path('ROOM_SIZE.large').defaultValue
-        }
-      }
-    }, {
-      upsert: true
-    });
-    await RoomModel.updateMany({
-      sizeName: "small"
-    }, {
-      $set: {
-        sizeValue: roomSchema.path('ROOM_SIZE.small').defaultValue,
-      }
-    }, {
-      upsert: true
-    });
-    await RoomModel.updateMany({
-      sizeName: "medium"
-    }, {
-      $set: {
-        sizeValue: roomSchema.path('ROOM_SIZE.medium').defaultValue,
-      }
-    }, {
-      upsert: true
-    });
-    await RoomModel.updateMany({
-      sizeName: "large"
-    }, {
-      $set: {
-        sizeValue: roomSchema.path('ROOM_SIZE.large').defaultValue,
-      }
-    }, {
-      upsert: true
-    });
+  // update database default room sizes
+  await roomSchema.statics.updateDatabaseDefaultRoomSizes();
     
-    setTimeout(() => console.log('__________________________________________________'), 500)
+    // setTimeout(() => console.log('__________________________________________________'), 500)
     
-   
     res.status(200).json({
       message: 'Room sizes updated successfully'
     });
-  } catch (error) {
-    res.status(500);
-    throw new Error('Error updating room sizes');
-  }
 });
 
 export {
