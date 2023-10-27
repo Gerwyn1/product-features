@@ -71,7 +71,7 @@ const deleteRoom = asyncHandler(async (req, res) => {
   const result = await RoomModel.deleteOne({
     _id: req.params.id
   });
-  
+
   if (result.deletedCount === 0) {
     res.status(404);
     throw new Error('Room not found');

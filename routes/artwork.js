@@ -20,9 +20,9 @@ router.get('/', ArtworkController.getAllArtworks);
 router.post('/:galleryId', protect, checkUserRole(ROLES_LIST.user), imageUpload.single('artworkImage'), ArtworkController.createArtwork);
 
 // update artwork
-router.patch('/:id', imageUpload.single('artworkImage'), ArtworkController.updateArtwork);
+router.patch('/:id', protect, checkUserRole(ROLES_LIST.user), imageUpload.single('artworkImage'), ArtworkController.updateArtwork);
 
 // delete artwork
-router.delete('/:id', ArtworkController.deleteArtwork);
+router.delete('/:id', protect, checkUserRole(ROLES_LIST.user), ArtworkController.deleteArtwork);
 
 export default router;

@@ -27,6 +27,10 @@ const checkUserRole = (...allowedRoles) => {
   return asyncHandler(async (req, res, next) => {
     try {
       const user = await UserModel.findById(req.user.id);
+
+      if (!user) {
+        throw new Error('Not authorized, please log in');
+      }
       
        if (!user?.roles) {
           throw new Error('Not authorized, no roles found');

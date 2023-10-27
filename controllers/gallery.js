@@ -2,15 +2,11 @@ import expressAsyncHandler from "express-async-handler";
 import createHttpError from "http-errors";
 
 import GalleryModel from "../models/gallery.js";
+import RoomModel from "../models/room.js";
 
 const createGallery = expressAsyncHandler(async(req, res, next) => {
-  const user = req.user;
-  if (!user) {
-    throw createHttpError(401, 'Not authorized, no user');
-  }
-
-  const room_id = req.params.roomId;
-  if (!room_id) {
+  const room = await RoomModel.findById(req.params.roomId);
+  if (!room) {
     throw createHttpError(404, 'Room not found');
   }
 
@@ -19,7 +15,7 @@ const createGallery = expressAsyncHandler(async(req, res, next) => {
     title,
     price,
     publish_type,
-    room_id
+    room_id: room
   });
 
   if (gallery) {

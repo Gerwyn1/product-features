@@ -17,11 +17,10 @@ router.get('/:galleryId', protect, checkUserRole(ROLES_LIST.user), GalleryContro
 // get all galleries
 router.get('/', protect, checkUserRole(ROLES_LIST.user), GalleryController.getAllGalleries);
 
-
-// update artwork
+// update
 // router.patch('/:id', imageUpload.single('artworkImage'), ArtworkController.updateArtwork);
 
-// delete artwork
+// delete
 // router.delete('/:id', ArtworkController.deleteArtwork);
 
 export default router;
