@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-//user schema
 export const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -61,6 +60,8 @@ export const userSchema = new mongoose.Schema({
   address_2: String,
   company_name: String,
   country: String,
+  profile_image: String,
+  banner_image: String,
 }, {
   timestamps: true
 })

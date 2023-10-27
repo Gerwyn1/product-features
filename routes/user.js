@@ -5,6 +5,7 @@ import { protect } from '../middleware/authMiddleware.js';
 import {ROLES_LIST} from "../config/roles_list.js";
 import {checkUserRole} from "../middleware/authMiddleware.js";
 import { requestVerificationCodeRateLimit } from "../middleware/rateLimitMiddleware.js";
+import {imageUpload} from "../middleware/mediaMiddleware.js";
 
 const router = express.Router();
 
@@ -39,7 +40,10 @@ router.delete('/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.d
 router
 .route('/profile')
 .get(protect, checkUserRole(ROLES_LIST.user), UserController.getUserProfile)
-.patch(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin), UserController.updateUserProfile);
+.patch(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin, ROLES_LIST.user), imageUpload.fields([
+  { name: 'profileImage', maxCount: 1 },
+  { name: 'bannerImage', maxCount: 1 },
+]), UserController.updateUserProfile);
 
 // disable user
 router.patch('/disable/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.disableUser);

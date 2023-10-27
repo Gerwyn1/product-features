@@ -45,6 +45,7 @@ const createArtwork = asyncHandler(async (req, res) => {
   if (!file) {
     throw createHttpError(404, 'Image not found');
   }
+
   const imagePngPath = await convertImagePath(file, req.user._id, gallery._id); // '/uploads/images/1694575721155.png'
 
   const artwork = await ArtworkModel.create({
@@ -90,7 +91,7 @@ const updateArtwork = asyncHandler(async (req, res) => {
   //   throw new Error('Image not found');
   // }
 
-  const imagePngPath = file ? await convertImagePath(file) : null; // '/uploads/images/1694575721155.png'
+  const imagePngPath = file ? await convertImagePath(file, req.user._id, gallery._id) : null; // '/uploads/images/1694575721155.png'
 
   if (artwork) {
     artwork.title = title || artwork.title;
