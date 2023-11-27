@@ -12,6 +12,7 @@ import {
   userSchema
 } from "../models/user.js";
 import convertImagePath from "../utils/convertImagePath.js";
+import chalk from "chalk";
 
 // get all users
 const getAllUsers = asyncHandler(async (_, res) => {
@@ -61,12 +62,14 @@ const logoutUser = (_, res) => {
 
 // register a new user
 const registerUser = asyncHandler(async (req, res) => {
+  console.log('register fn hit');
   const {
     username,
     first_name,
     last_name,
     email,
     password,
+    repeatPassword,
     mobile_no,
     company_name,
     address_1,
@@ -74,37 +77,40 @@ const registerUser = asyncHandler(async (req, res) => {
     country,
     postcode,
   } = req.body;
+  console.log('req.body: <br>', req.body)
+  console.log(req.files)
+  // const profileImageFile = req.files["profile_image"][0];
+  // const bannerImageFile = req.files["banner_image"][0];
+  // console.log(profileImageFile, bannerImageFile)
 
-  if (!username || !first_name || !last_name || !email || !password) {
+  if (!username || !email || !password || !repeatPassword) {
     throw createHttpError(400, 'Missing required fields');
   }
-
+  
   const userExists = await UserModel.findOne({
     email
   });
-
+  console.log(userExists)
+  
   if (userExists) {
     throw createHttpError(400, 'User already exists');
   }
+  console.log('lol')
 
   const newUser = await UserModel.create(req.body);
+  console.log('new user', newUser)
   if (newUser) {
-    generateToken(res, newUser._id);
-    res.status(201).json(newUser);
+    const token = generateToken(res, newUser._id);
+    res.status(201).json({...newUser, token});
   } else throw createHttpError(400, 'Invalid user data');
 });
 
 // get user profile
 const getUserProfile = asyncHandler(async (req, res) => {
-  const user = await UserModel.findById(req.user?._id);
-
+  // const user = await UserModel.findById(req.user._id);
+  const user = await UserModel.findById(req.params.userId);
   if (user) {
-    res.status(200).json({
-      _id: user._id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-    });
+    res.status(200).json(user);
   } else {
     res.status(404);
     throw new Error('User not found');
@@ -113,26 +119,26 @@ const getUserProfile = asyncHandler(async (req, res) => {
 
 // update user profile
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const {name, email, password} = req.body;
+  const {
+    name,
+    email,
+    password
+  } = req.body;
 
-  const user = await UserModel.findById(req.user?._id);
+  const user = await UserModel.findById(req.user._id);
 
-  const profileImage = req.files['profileImage'][0];
-  const bannerImage = req.files['bannerImage'][0];
+  if (user) {
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.password = password || user.password;
 
-  const profileImagePath = await convertImagePath(profileImage, user._id);
-  const bannerImagePath = await convertImagePath(bannerImage, user._id);
+    const updatedUser = await user.save();
 
-  user.name = name || user.name;
-  user.email = email || user.email;
-  user.password = password || user.password;
-
-  user.profile_image = profileImagePath || user.profile_image;
-  user.banner_image = bannerImagePath || user.banner_image;
-
-  const updatedUser = await user.save();
-
-  res.status(200).json(updatedUser);
+    res.status(200).json(updatedUser);
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
 });
 
 // delete user
@@ -360,6 +366,24 @@ const changePasswordExpiry = asyncHandler(async (req, res, next) => {
   });
 });
 
+const isPasswordExpired = asyncHandler(async (req, res, next) => {
+  const {
+    email
+  } = req.body;
+  const existingUser = User.findOne({
+    email
+  });
+  const currentDate = new Date();
+
+  if (currentDate > existingUser.passwordExpiresAt) {
+    throw createHttpError(400, "Password has expired. Please reset your password.");
+  } else {
+    res.status(200).json({
+      message: 'Password has not expired'
+    });
+  }
+})
+
 export {
   getAllUsers,
   registerUser,
@@ -373,5 +397,6 @@ export {
   verifyEmail,
   requestResetPasswordCode,
   resetPassword,
-  changePasswordExpiry
+  changePasswordExpiry,
+  isPasswordExpired
 }

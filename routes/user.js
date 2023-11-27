@@ -24,6 +24,9 @@ router.post("/reset-password-code", requestVerificationCodeRateLimit, UserContro
 // reset user password
 router.patch("/reset-password", UserController.resetPassword);
 
+// check if user password has expired
+router.post("/is-password-expired", UserController.isPasswordExpired);
+
 // register user
 router.post('/', UserController.registerUser);
 
@@ -38,8 +41,8 @@ router.delete('/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.d
 
 // get user profile & update user profile
 router
-.route('/profile')
-.get(protect, checkUserRole(ROLES_LIST.user), UserController.getUserProfile)
+.route('/profile/:userId')
+.get(protect, checkUserRole(ROLES_LIST.user), imageUpload.fields([{ name: "profile_image" }, { name: "banner_image" }]),  UserController.getUserProfile)
 .patch(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin, ROLES_LIST.user), imageUpload.fields([
   { name: 'profileImage', maxCount: 1 },
   { name: 'bannerImage', maxCount: 1 },

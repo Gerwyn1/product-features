@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 
 export const userSchema = new mongoose.Schema({
@@ -9,11 +9,11 @@ export const userSchema = new mongoose.Schema({
   },
   first_name: {
     type: String,
-    required: true
+    // required: true
   },
   last_name: {
     type: String,
-    required: true
+    // required: true
   },
   email: {
     type: String,
@@ -21,6 +21,10 @@ export const userSchema = new mongoose.Schema({
     unique: true
   },
   password: {
+    type: String,
+    required: true
+  },
+  repeatPassword: {
     type: String,
     required: true
   },
@@ -44,7 +48,7 @@ export const userSchema = new mongoose.Schema({
   passwordExpiresAt: {
     type: Date,
     default: new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000), // 3 months ahead
-    required: true
+    // required: true
   },
   setting: {
     type: mongoose.Schema.Types.ObjectId,
@@ -60,11 +64,45 @@ export const userSchema = new mongoose.Schema({
   address_2: String,
   company_name: String,
   country: String,
-  profile_image: String,
-  banner_image: String,
+  // profile_image: mongoose.Schema.Types.Mixed,
+  // banner_image: mongoose.Schema.Types.Mixed,
+  profile_image: {
+    type: Buffer,
+    required: true,
+  },
+  banner_image: {
+    type: Buffer,
+    required: true,
+  }
 }, {
   timestamps: true
 })
+
+// {
+//   lastModified: Number,
+//   lastModifiedDate: Date,
+//   name: String,
+//   size: Number,
+//   type: String,
+//   webkitRelativePath: String,
+//   "[[Prototype]]": Object
+// }
+
+
+        // username: "",
+        // email: "",
+        // password: "",
+        // repeatPassword: "",
+        // first_name: "",
+        // last_name: "",
+        // postcode: "",
+        // mobile_no: "",
+        // address_1: "",
+        // address_2: "",
+        // company_name: "",
+        // country: "",
+        // profile_image: "",
+        // banner_image: "",
 
 // Match user entered password to hashed password in database
 userSchema.methods.matchPassword = async function (enteredPassword) {
