@@ -12,9 +12,16 @@ const convertImagePath = async (file, userId, galleryId) => {
 
   const imagePngPath = file.fieldname === "artworkImage" ?
     `uploads/users/user_${userId}/gallery_${galleryId}/artwork_${artworkTimestamp}.png` :
-    file.fieldname === "profileImage" ? `uploads/users/user_${userId}/profile/profile_image.png` :
-    file.fieldname === "bannerImage" ? `uploads/users/user_${userId}/profile/banner_image.png` :
+    file.fieldname === "profile_image" ? `uploads/users/profile/profile_image.png` :
+    file.fieldname === "banner_image" ? `uploads/users/profile/banner_image.png` :
     null;
+
+
+  // const imagePngPath = file.fieldname === "artworkImage" ?
+  //   `uploads/users/user_${userId}/gallery_${galleryId}/artwork_${artworkTimestamp}.png` :
+  //   file.fieldname === "profile_image" ? `uploads/users/user_${userId}/profile/profile_image.png` :
+  //   file.fieldname === "banner_image" ? `uploads/users/user_${userId}/profile/banner_image.png` :
+  //   null;
 
   const directoryPath = path.dirname(imagePngPath);
   if (!fs.existsSync(directoryPath)) {
@@ -23,7 +30,12 @@ const convertImagePath = async (file, userId, galleryId) => {
     });
   }
 
+  console.log('directory path', directoryPath)
+
+  // const imageBuffer = await readFileAsync(file.path);
   const imageBuffer = await readFileAsync(file.path);
+
+  console.log('image buffer', imageBuffer)
 
   await sharp(imageBuffer.buffer).png({
     palette: true

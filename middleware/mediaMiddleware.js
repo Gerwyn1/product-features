@@ -14,9 +14,11 @@ export const imageUpload = multer({
     fileSize: 5 * 1024 * 1024,
   },
   fileFilter(req, file, cb) {
-    if (file.mimetype === "image/png" || file.mimetype === "image/jpeg") {
+    console.log(file.mimetype)
+    if (file.mimetype === "image/png" || file.mimetype === "image/jpeg" || file.mimetype === "image/jpg" || file.mimetype === "image/webp" || file.mimetype === "image/jfif") {
       cb(null, true);
     } else {
+      console.error('image file rejected!');
       cb(new Error("Unaccepted file type"));
     }
   }

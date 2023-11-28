@@ -28,7 +28,10 @@ router.patch("/reset-password", UserController.resetPassword);
 router.post("/is-password-expired", UserController.isPasswordExpired);
 
 // register user
-router.post('/', UserController.registerUser);
+router.post('/', imageUpload.fields([
+  { name: 'profile_image', maxCount: 1 },
+  { name: 'banner_image', maxCount: 1 },
+]), UserController.registerUser);
 
 // login user
 router.post('/auth', UserController.authUser);
@@ -40,12 +43,17 @@ router.post('/logout', protect, UserController.logoutUser);
 router.delete('/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.deleteUser);
 
 // get user profile & update user profile
+
+
+
+// imageUpload.fields([{ name: "profile_image" }, { name: "banner_image" }])
+
 router
 .route('/profile/:userId')
-.get(protect, checkUserRole(ROLES_LIST.user), imageUpload.fields([{ name: "profile_image" }, { name: "banner_image" }]),  UserController.getUserProfile)
+.get(protect, checkUserRole(ROLES_LIST.user),  UserController.getUserProfile)
 .patch(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin, ROLES_LIST.user), imageUpload.fields([
-  { name: 'profileImage', maxCount: 1 },
-  { name: 'bannerImage', maxCount: 1 },
+  { name: 'profile_image', maxCount: 1 },
+  { name: 'banner_image', maxCount: 1 },
 ]), UserController.updateUserProfile);
 
 // disable user

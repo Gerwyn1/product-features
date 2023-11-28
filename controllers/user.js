@@ -12,7 +12,7 @@ import {
   userSchema
 } from "../models/user.js";
 import convertImagePath from "../utils/convertImagePath.js";
-import chalk from "chalk";
+// import chalk from "chalk";
 
 // get all users
 const getAllUsers = asyncHandler(async (_, res) => {
@@ -24,29 +24,35 @@ const getAllUsers = asyncHandler(async (_, res) => {
 const authUser = asyncHandler(async (req, res) => {
   const {
     email,
-    password
+    password,
+    username
   } = req.body;
+  console.log(req.body)
   const existingUser = await UserModel.findOne({
-    email
+    username
   });
-
+  // email
+console.log(existingUser)
   // if user exists
-  if (!existingUser) throw newHttpError(401, 'Invalid email or password');
+  if (!existingUser) throw createHttpError(401, 'Invalid email or password');
 
   // if user banned
-  if (existingUser.is_disabled) throw newHttpError(403, "Your account has been suspended. Please contact support for more information.");
+  if (existingUser.is_disabled) throw createHttpError(403, "Your account has been suspended. Please contact support for more information.");
 
   // if password matches
   if (await existingUser.matchPassword(password)) {
+    console.log('first')
+
     // generate token
-    generateToken(res, user._id);
+    const token = generateToken(res, existingUser._id);
 
     res.status(200).json({
       _id: existingUser._id,
-      name: existingUser.name,
+      name: existingUser.username,
       email: existingUser.email,
+      token
     });
-  } else throw newHttpError(401, 'Invalid email or password');
+  } else throw createHttpError(401, 'Invalid email or password');
 });
 
 // logout user / clear cookie
@@ -62,7 +68,6 @@ const logoutUser = (_, res) => {
 
 // register a new user
 const registerUser = asyncHandler(async (req, res) => {
-  console.log('register fn hit');
   const {
     username,
     first_name,
@@ -76,28 +81,50 @@ const registerUser = asyncHandler(async (req, res) => {
     address_2,
     country,
     postcode,
+    profile_image,
+    banner_image
   } = req.body;
-  console.log('req.body: <br>', req.body)
-  console.log(req.files)
+  // console.log('req.body: <br>', req.body)
   // const profileImageFile = req.files["profile_image"][0];
   // const bannerImageFile = req.files["banner_image"][0];
   // console.log(profileImageFile, bannerImageFile)
 
-  if (!username || !email || !password || !repeatPassword) {
-    throw createHttpError(400, 'Missing required fields');
-  }
+  // if (!username || !email || !password || !repeatPassword) {
+  //   throw createHttpError(400, 'Missing required fields');
+  // }
   
-  const userExists = await UserModel.findOne({
-    email
-  });
-  console.log(userExists)
+  // const userExists = await UserModel.findOne({
+  //   email
+  // });
   
-  if (userExists) {
-    throw createHttpError(400, 'User already exists');
-  }
+  // if (userExists) {
+  //   throw createHttpError(400, 'User already exists');
+  // }
   console.log('lol')
+  // const profileImageBuffer = Buffer.from(profile_image, 'base64');
+  // const bannerImageBuffer = Buffer.from(banner_image, 'base64');
+  // console.log(profileImageBuffer)
+  // console.log(bannerImageBuffer)
+  
+// console.log('first', req.files["profile_image"])
+// console.log('second', req.files["banner_image"])
+console.log(req.files)
+  const profileImageFile = req.files["profile_image"][0]
+  const bannerImageFile = req.files["banner_image"][0]
+// req.files["profile_image"]
+// req.files["banner_image"]
+// console.log('req user _id', req.user._id)
+console.log('lol 2')
+  const profilePngPath = await convertImagePath(profileImageFile);
+  const bannerPngPath = await convertImagePath(bannerImageFile);
+  console.log(profilePngPath)
+  console.log(bannerPngPath)
 
-  const newUser = await UserModel.create(req.body);
+  console.log(req.body)
+console.log('before user creation')
+  const newUser = await UserModel.create({...req.body, profile_image: profilePngPath, banner_image: bannerPngPath});
+  console.log('user created')
+
   console.log('new user', newUser)
   if (newUser) {
     const token = generateToken(res, newUser._id);

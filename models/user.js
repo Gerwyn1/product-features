@@ -9,11 +9,11 @@ export const userSchema = new mongoose.Schema({
   },
   first_name: {
     type: String,
-    // required: true
+    required: true
   },
   last_name: {
     type: String,
-    // required: true
+    required: true
   },
   email: {
     type: String,
@@ -67,11 +67,11 @@ export const userSchema = new mongoose.Schema({
   // profile_image: mongoose.Schema.Types.Mixed,
   // banner_image: mongoose.Schema.Types.Mixed,
   profile_image: {
-    type: Buffer,
+    type: String,
     required: true,
   },
   banner_image: {
-    type: Buffer,
+    type: String,
     required: true,
   }
 }, {
@@ -106,6 +106,7 @@ export const userSchema = new mongoose.Schema({
 
 // Match user entered password to hashed password in database
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  console.log('match password?')
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
