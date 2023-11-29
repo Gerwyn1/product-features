@@ -43,11 +43,6 @@ router.post('/logout', protect, UserController.logoutUser);
 router.delete('/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.deleteUser);
 
 // get user profile & update user profile
-
-
-
-// imageUpload.fields([{ name: "profile_image" }, { name: "banner_image" }])
-
 router
 .route('/profile/:userId')
 .get(protect, checkUserRole(ROLES_LIST.user),  UserController.getUserProfile)

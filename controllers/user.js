@@ -27,12 +27,10 @@ const authUser = asyncHandler(async (req, res) => {
     password,
     username
   } = req.body;
-  console.log(req.body)
   const existingUser = await UserModel.findOne({
     username
   });
   // email
-console.log(existingUser)
   // if user exists
   if (!existingUser) throw createHttpError(401, 'Invalid email or password');
 
@@ -41,15 +39,13 @@ console.log(existingUser)
 
   // if password matches
   if (await existingUser.matchPassword(password)) {
-    console.log('first')
 
     // generate token
+    // const token = generateToken(res, newUser._id);
     const token = generateToken(res, existingUser._id);
 
     res.status(200).json({
-      _id: existingUser._id,
-      name: existingUser.username,
-      email: existingUser.email,
+      ...existingUser,
       token
     });
   } else throw createHttpError(401, 'Invalid email or password');
@@ -100,7 +96,6 @@ const registerUser = asyncHandler(async (req, res) => {
   // if (userExists) {
   //   throw createHttpError(400, 'User already exists');
   // }
-  console.log('lol')
   // const profileImageBuffer = Buffer.from(profile_image, 'base64');
   // const bannerImageBuffer = Buffer.from(banner_image, 'base64');
   // console.log(profileImageBuffer)
@@ -108,7 +103,6 @@ const registerUser = asyncHandler(async (req, res) => {
   
 // console.log('first', req.files["profile_image"])
 // console.log('second', req.files["banner_image"])
-console.log(req.files)
   const profileImageFile = req.files["profile_image"][0]
   const bannerImageFile = req.files["banner_image"][0]
 // req.files["profile_image"]
@@ -121,11 +115,8 @@ console.log('lol 2')
   console.log(bannerPngPath)
 
   console.log(req.body)
-console.log('before user creation')
   const newUser = await UserModel.create({...req.body, profile_image: profilePngPath, banner_image: bannerPngPath});
-  console.log('user created')
 
-  console.log('new user', newUser)
   if (newUser) {
     const token = generateToken(res, newUser._id);
     res.status(201).json({...newUser, token});
