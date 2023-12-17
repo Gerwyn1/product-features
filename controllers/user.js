@@ -64,6 +64,7 @@ const logoutUser = (_, res) => {
 
 // register a new user
 const registerUser = asyncHandler(async (req, res) => {
+  console.log('hit register controller')
   const {
     username,
     first_name,
@@ -80,6 +81,7 @@ const registerUser = asyncHandler(async (req, res) => {
     profile_image,
     banner_image
   } = req.body;
+  
   // console.log('req.body: <br>', req.body)
   // const profileImageFile = req.files["profile_image"][0];
   // const bannerImageFile = req.files["banner_image"][0];
@@ -105,14 +107,15 @@ const registerUser = asyncHandler(async (req, res) => {
 // console.log('second', req.files["banner_image"])
   const profileImageFile = req.files["profile_image"][0]
   const bannerImageFile = req.files["banner_image"][0]
+
 // req.files["profile_image"]
 // req.files["banner_image"]
 // console.log('req user _id', req.user._id)
 console.log('lol 2')
   const profilePngPath = await convertImagePath(profileImageFile);
   const bannerPngPath = await convertImagePath(bannerImageFile);
-  console.log(profilePngPath)
-  console.log(bannerPngPath)
+  // console.log(profilePngPath)
+  // console.log(bannerPngPath)
 
   console.log(req.body)
   const newUser = await UserModel.create({...req.body, profile_image: profilePngPath, banner_image: bannerPngPath});

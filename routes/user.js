@@ -31,7 +31,7 @@ router.post("/is-password-expired", UserController.isPasswordExpired);
 router.post('/', imageUpload.fields([
   { name: 'profile_image', maxCount: 1 },
   { name: 'banner_image', maxCount: 1 },
-]), UserController.registerUser);
+]),  UserController.registerUser);
 
 // login user
 router.post('/auth', UserController.authUser);

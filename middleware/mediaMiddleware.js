@@ -16,6 +16,7 @@ export const imageUpload = multer({
   fileFilter(req, file, cb) {
     console.log(file.mimetype)
     if (file.mimetype === "image/png" || file.mimetype === "image/jpeg" || file.mimetype === "image/jpg" || file.mimetype === "image/webp" || file.mimetype === "image/jfif") {
+      console.log('image file accepted!');
       cb(null, true);
     } else {
       console.error('image file rejected!');
