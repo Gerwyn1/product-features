@@ -17,7 +17,8 @@ router.get('/:id', ArtworkController.getArtwork);
 router.get('/', ArtworkController.getAllArtworks);
 
 // create artwork
-router.post('/:galleryId', protect, checkUserRole(ROLES_LIST.user), imageUpload.single('artworkImage'), ArtworkController.createArtwork);
+// protect, checkUserRole(ROLES_LIST.user),
+router.post('/:galleryId',  imageUpload.single('artworkImage'), ArtworkController.createArtwork);
 
 // update artwork
 router.patch('/:id', protect, checkUserRole(ROLES_LIST.user), imageUpload.single('artworkImage'), ArtworkController.updateArtwork);

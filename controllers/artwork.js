@@ -21,6 +21,7 @@ const getAllArtworks = asyncHandler(async (_, res) => {
 });
 
 const createArtwork = asyncHandler(async (req, res) => {
+  // console.log('lol123123')
   const gallery = await GalleryModel.findById(req.params.galleryId);
   if (!gallery) {
     throw createHttpError(404, 'Gallery not found');
@@ -46,8 +47,9 @@ const createArtwork = asyncHandler(async (req, res) => {
     throw createHttpError(404, 'Image not found');
   }
 
-  const imagePngPath = await convertImagePath(file, req.user._id, gallery._id); // '/uploads/images/1694575721155.png'
 
+  const imagePngPath = await convertImagePath(file, "req.user._id", gallery._id); // '/uploads/images/1694575721155.png'
+console.log(imagePngPath)
   const artwork = await ArtworkModel.create({
     gallery_id: gallery,
     title,

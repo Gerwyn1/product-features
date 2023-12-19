@@ -8,10 +8,10 @@ import path from 'path';
 const readFileAsync = promisify(fs.readFile);
 
 const convertImagePath = async (file, userId, galleryId) => {
+  console.log(file)
   const artworkTimestamp = file.fieldname === 'artworkImage' ? file.filename.split(".").shift() : null; // '1694487585110'
-
   const imagePngPath = file.fieldname === "artworkImage" ?
-    `uploads/users/user_${userId}/gallery_${galleryId}/artwork_${artworkTimestamp}.png` :
+    `/uploads/users/user_${userId}/gallery_${galleryId}/artwork_${artworkTimestamp}.png` :
     file.fieldname === "profile_image" ? `uploads/users/profile/profile_image.png` :
     file.fieldname === "banner_image" ? `uploads/users/profile/banner_image.png` :
     null;
