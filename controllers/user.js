@@ -111,14 +111,13 @@ const registerUser = asyncHandler(async (req, res) => {
 // req.files["profile_image"]
 // req.files["banner_image"]
 // console.log('req user _id', req.user._id)
-console.log('lol 2')
   const profilePngPath = await convertImagePath(profileImageFile);
   const bannerPngPath = await convertImagePath(bannerImageFile);
   // console.log(profilePngPath)
   // console.log(bannerPngPath)
 
   console.log(req.body)
-  const newUser = await UserModel.create({...req.body, profile_image: profilePngPath, banner_image: bannerPngPath});
+  const newUser = await UserModel.create({username, email, password, profile_image: profilePngPath, banner_image: bannerPngPath});
 
   if (newUser) {
     const token = generateToken(res, newUser._id);
