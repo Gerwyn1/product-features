@@ -45,7 +45,7 @@ router.delete('/:id', protect, checkUserRole(ROLES_LIST.admin), UserController.d
 // get user profile & update user profile
 router
 .route('/profile/:userId')
-.get(protect, checkUserRole(ROLES_LIST.user),  UserController.getUserProfile)
+.get(UserController.getUserProfile)
 .patch(protect, checkUserRole(ROLES_LIST.editor, ROLES_LIST.admin, ROLES_LIST.user), imageUpload.fields([
   { name: 'profile_image', maxCount: 1 },
   { name: 'banner_image', maxCount: 1 },
