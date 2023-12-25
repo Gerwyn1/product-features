@@ -38,7 +38,9 @@ export const userSchema = new mongoose.Schema({
   },
   roles: {
     type: [String],
-    default: ['user']
+    default: ['user'],
+    // enum: ['user', 'admin', 'superadmin']
+    // default: 'admin'
   },
   postcode: {
     type: String,
@@ -72,8 +74,6 @@ export const userSchema = new mongoose.Schema({
   address_2: String,
   company_name: String,
   country: String,
-  // profile_image: mongoose.Schema.Types.Mixed,
-  // banner_image: mongoose.Schema.Types.Mixed,
   profile_image: {
     type: String,
     required: [true, 'Profile image is required.'],
